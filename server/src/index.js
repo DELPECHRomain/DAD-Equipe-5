@@ -4,8 +4,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
-const UserRouter = require('./routes/user.routes');
-const { User } = require('./models/User');
+const UserRouter = require('./routes/auth_user.routes');
+const { Auth_User } = require('./models/Auth_User');
 
 dotenv.config();
 
@@ -20,7 +20,7 @@ app.use(cors({
 app.use(cookieParser());
 
 app.get('/users', (req, res) => {
-  User.find()
+  Auth_User.find()
     .then(users => res.json(users))
     .catch(err => res.json(err));
 });

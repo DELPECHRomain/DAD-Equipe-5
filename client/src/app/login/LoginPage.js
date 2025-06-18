@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import Loader from '@/components/Loader';
 
 export default function LoginClient() {
-  const { login } = useAuth();
+  const { accessToken, login } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -15,11 +16,20 @@ export default function LoginClient() {
   const [from, setFrom] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    if (accessToken) {
+      router.push(`/`);
+    }
+    setLoading(false);
+  }, [accessToken, router]);
 
   useEffect(() => {
     setFrom(searchParams.get('from') || '');
   }, [searchParams]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,6 +45,14 @@ export default function LoginClient() {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div>
+        <Loader></Loader>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -70,11 +88,10 @@ export default function LoginClient() {
           <button
             type="submit"
             disabled={loading}
-            className={`text-white w-full py-2 rounded-3xl font-semibold ${
-              loading
-                ? 'bg-indigo-800 cursor-not-allowed'
-                : 'bg-indigo-800 hover:bg-blue-700'
-            }`}
+            className={`text-white w-full py-2 rounded-3xl font-semibold ${loading
+              ? 'bg-indigo-800 cursor-not-allowed'
+              : 'bg-indigo-800 hover:bg-blue-700'
+              }`}
           >
             {loading ? 'Connexion en cours...' : 'Connexion'}
           </button>
