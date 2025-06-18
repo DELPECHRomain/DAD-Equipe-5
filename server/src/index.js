@@ -27,6 +27,9 @@ app.get('/users', (req, res) => {
 
 app.use('/auth', UserRouter);
 
+const usersRouter = require('./routes/user_routes.js');
+app.use('/users', usersRouter);
+
 const port = process.env.PORT || 3000;
 
 mongoose.connect("mongodb://localhost:27017/bddTest")
