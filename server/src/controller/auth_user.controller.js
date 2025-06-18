@@ -36,17 +36,21 @@ module.exports = {
 
         const user = await Auth_User.findOne({ email });
 
+        if (!user) {
+            return res.status(401).json({ message: "user or password's incorrect" });
+        }
+
         const validPassword = await bcrypt.compare(password, user.password);
 
-        // Avoid specifying which part is incorrect for a security concern
-        if (!validPassword || !user) {
-            return res.json({ message: "user or password's incorrect" })
+        if (!validPassword) {
+            return res.status(401).json({ message: "user or password's incorrect" });
         }
 
         const key = "jwttokenkey";
+        const token = jwt.sign({ username: user.username }, key, { expiresIn: '1h' });
 
-        const token = jwt.sign({ username: user.username }, key, { expiresIn: '1h' })
-        res.cookie('token', token, { httpOnly: true, maxAge: 360000 })
-        return res.json({ status: true, message: "login successfully", token })
+        res.cookie('token', token, { httpOnly: true, maxAge: 360000 });
+        return res.json({ status: true, message: "login successfully", token });
     }
+
 };

@@ -30,7 +30,6 @@ export default function LoginClient() {
     setFrom(searchParams.get('from') || '');
   }, [searchParams]);
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
