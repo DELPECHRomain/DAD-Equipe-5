@@ -7,7 +7,7 @@ import ClientOnly from "@/components/ClientOnly";
 
 export default function RootLayout({ children }) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body>
                 <ClientOnly>
                     <AuthProvider>

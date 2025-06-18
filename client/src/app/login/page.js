@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import LoginClient from './LoginClient';
+import LoginClient from './LoginPage';
 
 export default function Page() {
   return (
