@@ -29,10 +29,7 @@ app.use('/auth', UserRouter);
 
 const port = process.env.PORT || 3000;
 
-mongoose.connect("mongodb://localhost:27017/bddTest", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect("mongodb://localhost:27017/bddTest")
 .then(() => console.log("Connection to the db successful"))
 .catch(err => console.error("Error connecting to the db:", err));
 
