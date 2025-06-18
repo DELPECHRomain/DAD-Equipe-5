@@ -1,26 +1,26 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 
-const User = require('../models/User.js');
+const Auth_User = require('../models/Auth_User.js');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
 
     register: async (req, res) => {
         const { username, email, password } = req.body;
-        const emailAlreadyExists = await User.findOne({ email });
+        const emailAlreadyExists = await Auth_User.findOne({ email });
         if (emailAlreadyExists) {
             return res.status(400).json({ message: "user already exists with this email." })
         }
 
-        const usernameAlreadyExists = await User.findOne({ username });
+        const usernameAlreadyExists = await Auth_User.findOne({ username });
         if (usernameAlreadyExists) {
             return res.status(400).json({ message: "user already exists with this username." })
         }
 
         const hashpassword = await bcrypt.hash(password, 10);
 
-        const newUser = new User({
+        const newUser = new Auth_User({
             username,
             email,
             password: hashpassword,
@@ -34,7 +34,7 @@ module.exports = {
     login: async (req, res) => {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        const user = await Auth_User.findOne({ email });
 
         if (!user) {
             return res.status(401).json({ message: "user or password's incorrect" });

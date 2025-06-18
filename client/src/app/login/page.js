@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
-import LoginClient from './LoginPage';
+import LoginPage from './LoginPage'
 
 export default function Page() {
   return (
     <Suspense fallback={null}>
-      <LoginClient />
+      <LoginPage />
     </Suspense>
   );
 }
