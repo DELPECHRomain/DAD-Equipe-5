@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-
+const profileRouter = require('./routes/profile_route');
 const UserRouter = require('./routes/auth_user.routes');
 const { Auth_User } = require('./models/Auth_User');
 
@@ -11,6 +11,7 @@ dotenv.config();
 
 const app = express();
 
+app.use('/profile', profileRouter);
 app.use(express.json());
 app.use(cors({
   origin: ["http://localhost:8080"],
