@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { use } = require('react');
 
 const ProfileSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },

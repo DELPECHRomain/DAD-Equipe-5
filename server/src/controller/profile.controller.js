@@ -7,12 +7,10 @@ module.exports = {
     createProfile: async (req, res) => {
         try {
 
-            const token = req.cookies.token;
-            if (!token) {
+            const userId = req.params.id;
+            if (!userId) {
                 return res.status(401).json({ message: "Unauthorized" });
             }
-
-            const {userId} = jwt.verify(token, process.env.JWT_SECRET);
 
             const existingProfile = await Profile.findOne({ userId });
             if (existingProfile) {
@@ -34,19 +32,17 @@ module.exports = {
             res.status(201).json({ message: "Profile created successfully", profile: newProfile });
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: "Internal server error" });
         }
 
     },
 
     getProfile: async (req, res) => {
         try {
-            const token = req.cookies.token;
-            if (!token) {
-                return res.status(401).json({ message: "Unauthorized" });
-            }
+            const userId = req.params.id;
+            if (!userId) {
+                 return res.status(401).json({ message: "Unauthorized" });
+         }
 
-            const { userId } = jwt.verify(token, process.env.JWT_SECRET);
             const profile = await Profile.findOne({ userId });
 
             if (!profile) {
@@ -56,18 +52,16 @@ module.exports = {
             res.status(200).json(profile);
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: "Internal server error" });
         }
     },
 
     updateProfile: async (req, res) => {
         try {
-            const token = req.cookies.token;
-            if (!token) {
+            const userId = req.params.id;
+            if (!userId) {
                 return res.status(401).json({ message: "Unauthorized" });
             }
 
-            const { userId } = jwt.verify(token, process.env.JWT_SECRET);
             const updatedProfile = await Profile.findOneAndUpdate(
                 { userId },
                 { $set: req.body },
@@ -80,19 +74,16 @@ module.exports = {
 
             res.status(200).json({ message: "Profile updated successfully", profile: updatedProfile });
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: "Internal server error" });
-        }
+            console.error(err);        }
     },
 
     deleteProfile: async (req, res) => {
         try {
-            const token = req.cookies.token;
-            if (!token) {
+            const userId = req.params.id;
+            if (!userId) {
                 return res.status(401).json({ message: "Unauthorized" });
             }
 
-            const { userId } = jwt.verify(token, process.env.JWT_SECRET);
             const deletedProfile = await Profile.findOneAndDelete({ userId });
 
             if (!deletedProfile) {
@@ -101,9 +92,7 @@ module.exports = {
 
             res.status(200).json({ message: "Profile deleted successfully" });
         } catch (err) {
-            console.error(err);
-            res.status(500).json({ message: "Internal server error" });
-        }
+            console.error(err);        }
     }
 
 
