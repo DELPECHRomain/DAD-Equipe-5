@@ -9,7 +9,7 @@ const apiClient = axios.create({
 
 export const loginUser = async (email, password) => {
     try {
-        const response = await apiClient.post('/auth/login', {
+        const response = await apiClient.post('/auth-service/login', {
             email,
             password,
         });
@@ -24,7 +24,7 @@ export const loginUser = async (email, password) => {
 
 export const registerUser = async (username, email, password) => {
     try {
-        const response = await apiClient.post('/auth/register', {
+        const response = await apiClient.post('/auth-service/register', {
             username,
             email,
             password,
