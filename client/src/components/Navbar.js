@@ -11,7 +11,7 @@ export default function Navbar() {
     return (
         <nav className="bg-black text-white p-4">
             <div className="container mx-auto flex justify-between items-center">
-                <Link href="/">
+                <Link href="/home">
                     <span className="text-2xl font-bold cursor-pointer">Breezy</span>
                 </Link>
                 <div className="flex space-x-4">
