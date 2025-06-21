@@ -1,56 +1,90 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-
-const Auth_User = require('../models/Auth_User.js');
 const jwt = require('jsonwebtoken');
+const Auth_User = require('../models/Auth_User.js');
+const User = require('../models/User.js');
 
 module.exports = {
 
-    register: async (req, res) => {
-        const { username, email, password } = req.body;
-        const emailAlreadyExists = await Auth_User.findOne({ email });
-        if (emailAlreadyExists) {
-            return res.status(400).json({ message: "user already exists with this email." })
-        }
+  // REGISTER
+  register: async (req, res) => {
+    try {
+      const { username, email, password } = req.body;
 
-        const usernameAlreadyExists = await Auth_User.findOne({ username });
-        if (usernameAlreadyExists) {
-            return res.status(400).json({ message: "user already exists with this username." })
-        }
+      const emailAlreadyExists = await Auth_User.findOne({ email });
+      if (emailAlreadyExists) {
+        return res.status(400).json({ message: "Un compte existe déjà avec cet email." });
+      }
 
-        const hashpassword = await bcrypt.hash(password, 10);
+      const usernameAlreadyExists = await User.findOne({ username });
+      if (usernameAlreadyExists) {
+        return res.status(400).json({ message: "Ce nom d'utilisateur est déjà pris." });
+      }
 
-        const newUser = new Auth_User({
-            username,
-            email,
-            password: hashpassword,
-        });
+      const passwordHash = await bcrypt.hash(password, 10);
 
-        await newUser.save();
-        return res.json({ status: true, message: "record registered" })
+      const newUser = new User({
+        username,
+        email,
+        createdAt: new Date(),
+        isVerified: false
+      });
+      await newUser.save();
 
-    },
+      const newAuth = new Auth_User({
+        userId: newUser._id,
+        email,
+        passwordHash,
+        createdAt: new Date(),
+        isActive: true,
+        roles: ["user"]
+      });
+      await newAuth.save();
 
-    login: async (req, res) => {
-        const { email, password } = req.body;
+      return res.status(201).json({ status: true, message: "Compte créé avec succès." });
 
-        const user = await Auth_User.findOne({ email });
-
-        if (!user) {
-            return res.status(401).json({ message: "user or password's incorrect" });
-        }
-
-        const validPassword = await bcrypt.compare(password, user.password);
-
-        if (!validPassword) {
-            return res.status(401).json({ message: "user or password's incorrect" });
-        }
-
-        const key = "jwttokenkey";
-        const token = jwt.sign({ username: user.username }, key, { expiresIn: '1h' });
-
-        res.cookie('token', token, { httpOnly: true, maxAge: 360000 });
-        return res.json({ status: true, message: "login successfully", token });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Erreur serveur." });
     }
+  },
+
+  login: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      const authUser = await Auth_User.findOne({ email });
+      if (!authUser) {
+        return res.status(401).json({ message: "Email ou mot de passe incorrect." });
+      }
+
+      const validPassword = await bcrypt.compare(password, authUser.passwordHash);
+      if (!validPassword) {
+        return res.status(401).json({ message: "Email ou mot de passe incorrect." });
+      }
+
+      authUser.lastLogin = new Date();
+      await authUser.save();
+
+      const key = "jwttokenkey";
+      const token = jwt.sign(
+        { userId: authUser.userId, roles: authUser.roles },
+        key,
+        { expiresIn: '1h' }
+      );
+
+      res.cookie('token', token, { httpOnly: true, maxAge: 3600000 });
+
+      return res.status(200).json({
+        status: true,
+        message: "Connexion réussie.",
+        token
+      });
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Erreur serveur." });
+    }
+  }
 
 };

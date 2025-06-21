@@ -56,7 +56,7 @@ export default function LoginClient() {
   return (
 
     <div className="flex min-h-screen bg-gray-200 text-white">
-      <div className="hidden md:flex w-1/2 items-center justify-center bg-gray-200">
+      <div className="hidden md:flex w-1/2 items-center justify-center bg-gray-200 ml-64">
         <Image
           src="/breezy-logo.svg"
           alt="Logo"
@@ -93,8 +93,8 @@ export default function LoginClient() {
 
           <button
             type="submit"
-            className={`w-full py-3 rounded-full text-white font-semibold 
-                 bg-indigo-800`}>
+            className="w-full py-3 rounded-full text-white font-semibold 
+                 bg-indigo-800 cursor-pointer hover:bg-indigo-700">
             Connexion
           </button>
 
@@ -115,7 +115,7 @@ export default function LoginClient() {
           href={`/register${from ? `?from=${encodeURIComponent(from)}` : "/"}`}
           className="w-full max-w-sm"
         >
-          <button className="w-full py-3 px-4 rounded-full bg-white border text-indigo-800 border-indigo-800 font-semibold hover:bg-indigo-50 transition">
+          <button className="w-full py-3 px-4 rounded-full bg-white border text-indigo-800 border-indigo-800 font-semibold hover:bg-indigo-50 transition cursor-pointer">
             S'inscrire
           </button>
         </Link>

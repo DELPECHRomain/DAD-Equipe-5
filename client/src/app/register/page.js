@@ -52,7 +52,7 @@ export default function RegisterPage() {
 
     return (
         <div className="flex min-h-screen bg-gray-200 text-white">
-            <div className="hidden md:flex w-1/2 items-center justify-center bg-gray-200">
+            <div className="hidden md:flex w-1/2 items-center justify-center bg-gray-200 ml-64">
                 <Image
                     src="/breezy-logo.svg"
                     alt="Logo"
@@ -98,9 +98,7 @@ export default function RegisterPage() {
 
                     <button
                         type="submit"
-                        className={`w-full py-3 rounded-full text-white font-semibold bg-indigo-800 hover:bg-blue-700 transition"
-                            }`}
-                    >
+                        className="w-full py-3 rounded-full text-white font-semibold bg-indigo-800 hover:bg-indigo-700 transition cursor-pointer">
                         S'inscrire
                     </button>
 
@@ -116,7 +114,7 @@ export default function RegisterPage() {
                 </div>
 
                 <Link href="/login" className="w-full max-w-sm">
-                    <button className="w-full py-3 px-4 rounded-full bg-white border text-indigo-800 border-indigo-800 font-semibold hover:bg-indigo-50 transition">
+                    <button className="w-full py-3 px-4 rounded-full bg-white border text-indigo-800 border-indigo-800 font-semibold hover:bg-indigo-50 transition cursor-pointer">
                         Se connecter
                     </button>
                 </Link>
