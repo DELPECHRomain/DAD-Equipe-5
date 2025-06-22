@@ -1,15 +1,18 @@
 const Profile = require('../models/Profile.js');
+const User = require('../models/User.js');
 
-// GET profile by userId
 exports.getProfile = async (req, res) => {
   try {
-    const profile = await Profile.findOne({ userId: req.params.userId });
+    const profile = await Profile.findOne({ userId: req.params.userId })
+      .populate('userId', 'username'); 
+
     if (!profile) return res.status(404).json({ message: 'Profile not found' });
     res.json(profile);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // CREATE profile
 exports.createProfile = async (req, res) => {
@@ -47,3 +50,68 @@ exports.deleteProfile = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.searchProfiles = async (req, res) => {
+  
+  const query = req.query.query || "";
+
+  try {
+    if (query === "") {
+      // Retourne les 5 premiers profils avec username
+      const profiles = await Profile.find({})
+        .sort({ createdAt: 1 })
+        .limit(5)
+        .populate('userId', 'username');
+
+      return res.json(profiles);
+    }
+
+    const regexQuery = new RegExp(query, "i");
+
+    const profiles = await Profile.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      { $unwind: "$user" },
+      {
+        $match: {
+          $or: [
+            { "user.username": { $regex: regexQuery } },
+            { "displayName": { $regex: regexQuery } }
+          ]
+        }
+      },
+      { $limit: 10 },
+      {
+        $project: {
+          userId: 1,
+          displayName: 1,
+          bio: 1,
+          profileImage: 1,
+          bannerImage: 1,
+          location: 1,
+          website: 1,
+          followers: 1,
+          following: 1,
+          createdAt: 1,
+          user: {
+            _id: 1,
+            username: 1
+          }
+        }
+      }
+    ]);
+
+    res.json(profiles);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+};
+

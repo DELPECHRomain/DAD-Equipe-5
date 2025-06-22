@@ -1,12 +1,12 @@
 import axios from "axios";
 
 const authClient = axios.create({
-  baseURL: "http://localhost:3000", 
+  baseURL: "http://localhost:3000",
   timeout: 5000,
 });
 
 const profileClient = axios.create({
-  baseURL: "http://localhost:3002", 
+  baseURL: "http://localhost:3002",
   timeout: 5000,
 });
 
@@ -134,6 +134,18 @@ export const addReply = async (token, postId, userId, content) => {
       { userId, content },
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+export const searchProfiles = async (token, query) => {
+  try {
+    const response = await profileClient.get(`/profile-service/search?query=${encodeURIComponent(query)}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     throw error;

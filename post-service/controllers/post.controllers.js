@@ -87,7 +87,6 @@ exports.addReply = async (req, res) => {
 };
 
 
-// Ajouter / retirer un like
 exports.toggleLike = async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
@@ -103,11 +102,17 @@ exports.toggleLike = async (req, res) => {
     }
 
     await post.save();
-    res.status(200).json(post);
+
+    const populatedPost = await Post.findById(post._id)
+      .populate("userId", "username displayName")
+      .populate("replies.userId", "username displayName");
+
+    res.status(200).json(populatedPost);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 
 // Récupérer les posts des utilisateurs suivis (followingIds)
