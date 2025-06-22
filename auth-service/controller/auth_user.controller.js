@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Auth_User = require('../models/Auth_User.js');
 const User = require('../models/User.js');
+const Profile = require('../models/Profile.js');
+
 
 module.exports = {
 
@@ -41,11 +43,24 @@ module.exports = {
       });
       await newAuth.save();
 
+      const newProfile = new Profile({
+        userId: newUser._id,
+        displayName: username,
+        bio: "",
+        profileImage: "",
+        bannerImage: "",
+        location: "",
+        website: "",
+        followers: [],
+        following: [],
+        createdAt: new Date()
+      });
+      await newProfile.save();
+
       return res.status(201).json({ status: true, message: "Compte créé avec succès." });
 
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Erreur serveur." });
+      res.json({ error });
     }
   },
 
@@ -63,12 +78,17 @@ module.exports = {
         return res.status(401).json({ message: "Email ou mot de passe incorrect." });
       }
 
+      const user = await User.findById(authUser.userId);
+      if (!user) {
+        return res.status(401).json({ message: "Utilisateur non trouvé." });
+      }
+
       authUser.lastLogin = new Date();
       await authUser.save();
 
       const key = "jwttokenkey";
       const token = jwt.sign(
-        { userId: authUser.userId, roles: authUser.roles },
+        { userId: authUser.userId, roles: authUser.roles, username: user.username },
         key,
         { expiresIn: '1h' }
       );
@@ -83,8 +103,9 @@ module.exports = {
 
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Erreur serveur." });
+      res.json({ error });
     }
   }
+
 
 };

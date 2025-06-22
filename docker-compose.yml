@@ -20,6 +20,18 @@ services:
     networks:
       - my-network
 
+  profile-service:
+    build:
+      context: ./profile-service
+    ports:
+      - '3002:3001'
+    env_file:
+      - ./profile-service/.env
+    depends_on:
+      - mongo
+    networks:
+      - my-network
+
   client:
     build:
       context: ./client

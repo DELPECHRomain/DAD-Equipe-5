@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { loginUser, registerUser } from "@/utils/api";
+import { parseJwt } from "@/utils/jwt";
 
 
 const AuthContext = createContext();
@@ -10,6 +11,8 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
 
     const [accessToken, setAccessToken] = useState(null);
+    const [userId, setUserId] = useState(null);
+    const [username, setUsername] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
 
 
@@ -17,10 +20,13 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem("accessToken");
         if (token) {
             setAccessToken(token);
+            const payload = parseJwt(token);
+            setUserId(payload?.userId || null);
+            setUsername(payload?.username || null);
         }
         setIsLoading(false);
     }, []);
-    
+
 
     const register = async (username, email, password) => {
         try {
@@ -43,6 +49,9 @@ export const AuthProvider = ({ children }) => {
             if (token) {
                 setAccessToken(token);
                 localStorage.setItem("accessToken", token);
+                const payload = parseJwt(token);
+                setUserId(payload?.userId);
+                setUsername(payload?.username);
             } else {
                 throw new Error("Login failed, no token received.");
             }
@@ -54,11 +63,13 @@ export const AuthProvider = ({ children }) => {
 
     const logout = () => {
         setAccessToken(null);
+        setUserId(null);
+        setUsername(null);
         localStorage.removeItem("accessToken");
     };
 
     return (
-        <AuthContext.Provider value={{ accessToken, login, logout, register, isLoading }}>
+        <AuthContext.Provider value={{ accessToken, userId, username, login, logout, register, isLoading }}>
             {children}
         </AuthContext.Provider>
     );
