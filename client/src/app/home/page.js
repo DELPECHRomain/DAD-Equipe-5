@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { searchProfiles, fetchUserProfile, toggleLike, addReply } from "@/utils/api";
+import { searchProfiles, fetchUserProfile, toggleLike, addReply, fetchFollowingPosts } from "@/utils/api";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
 
@@ -156,7 +156,7 @@ export default function HomeConnected() {
             return (
               <div key={post._id} className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold">{post.username}</span>
+                  <span className="font-semibold">{post.userId?.username}</span>
                   <span className="text-gray-500 text-sm">
                     {new Date(post.createdAt).toLocaleString()}
                   </span>

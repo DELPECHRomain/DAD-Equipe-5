@@ -115,3 +115,41 @@ exports.searchProfiles = async (req, res) => {
   }
 };
 
+exports.followUser = async (req, res) => {
+  try {
+    const { currentUserId, userIdToFollow } = req.body;
+
+    if (!currentUserId || !userIdToFollow) {
+      return res.status(400).json({ message: "Paramètres manquants." });
+    }
+
+    if (currentUserId === userIdToFollow) {
+      return res.status(400).json({ message: "Vous ne pouvez pas vous suivre vous-même." });
+    }
+
+    const currentUserProfile = await Profile.findOne({ userId: currentUserId });
+    const targetUserProfile = await Profile.findOne({ userId: userIdToFollow });
+
+    if (!currentUserProfile || !targetUserProfile) {
+      return res.status(404).json({ message: "Profil introuvable." });
+    }
+
+    const isFollowing = currentUserProfile.following.includes(userIdToFollow);
+
+    if (isFollowing) {
+      currentUserProfile.following.pull(userIdToFollow);
+      targetUserProfile.followers.pull(currentUserId);
+    } else {
+      currentUserProfile.following.push(userIdToFollow);
+      targetUserProfile.followers.push(currentUserId);
+    }
+
+    await currentUserProfile.save();
+    await targetUserProfile.save();
+
+    res.json({ following: !isFollowing });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+

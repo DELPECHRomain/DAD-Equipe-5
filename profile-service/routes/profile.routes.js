@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const profileController = require('../controllers/profile.controller');
+router.post('/follow', profileController.followUser);
 router.get('/search', profileController.searchProfiles);
 
 router.get('/:userId', profileController.getProfile);

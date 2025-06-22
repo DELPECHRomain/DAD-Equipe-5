@@ -151,3 +151,18 @@ export const searchProfiles = async (token, query) => {
     throw error;
   }
 };
+
+export const toggleFollow = async (token, currentUserId, userIdToFollow) => {
+  try {
+    const response = await profileClient.post(
+      `/profile-service/follow`,
+      { currentUserId, userIdToFollow },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

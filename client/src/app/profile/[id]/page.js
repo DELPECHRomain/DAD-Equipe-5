@@ -9,6 +9,7 @@ import {
   updateUserProfile,
   toggleLike,
   addReply,
+  toggleFollow,
 } from "@/utils/api";
 import { AiOutlineEnvironment, AiOutlineLink, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
@@ -33,6 +34,26 @@ export default function Profile() {
 
   const [commentInputs, setCommentInputs] = useState({});
   const [openComments, setOpenComments] = useState({});
+
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  useEffect(() => {
+    if (profile && profile.followers) {
+      setIsFollowing(profile.followers.includes(userId));
+    }
+  }, [profile, userId]);
+
+  const handleToggleFollow = async () => {
+    try {
+      const result = await toggleFollow(accessToken, userId, profile.userId._id);
+      setIsFollowing(result.following);
+
+      const updatedProfile = await fetchUserProfile(accessToken, profileId);
+      setProfile(updatedProfile);
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   useEffect(() => {
     if (!accessToken) {
@@ -183,6 +204,17 @@ export default function Profile() {
               <div><span>{profile.followers?.length || 0}</span> abonnés</div>
               <div><span>{profile.following?.length || 0}</span> abonnements</div>
             </div>
+
+            {userId !== profileId && (
+              <button
+                onClick={handleToggleFollow}
+                className={`mt-4 px-4 py-2 rounded-full font-semibold ${isFollowing ? "bg-gray-300 text-black" : "bg-blue-600 text-white"
+                  }`}
+              >
+                {isFollowing ? "Se désabonner" : "S'abonner"}
+              </button>
+            )}
+
 
             <div className="mt-8">
               <h2 className="text-xl font-bold text-black mb-4">Mes posts</h2>
