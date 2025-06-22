@@ -3,8 +3,15 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { fetchUserProfile, fetchUserPosts } from "@/utils/api";
-import { AiOutlineEnvironment, AiOutlineLink } from "react-icons/ai";
+import {
+  fetchUserProfile,
+  fetchUserPosts,
+  updateUserProfile,
+  toggleLike,
+  addReply,
+} from "@/utils/api";
+import { AiOutlineEnvironment, AiOutlineLink, AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { FaRegCommentDots } from "react-icons/fa";
 
 export default function Profile() {
   const { accessToken, username, userId } = useAuth();
@@ -14,7 +21,6 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [posts, setPosts] = useState([]);
-
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
     displayName: "",
@@ -23,12 +29,14 @@ export default function Profile() {
     website: "",
   });
 
+  const [commentInputs, setCommentInputs] = useState({});
+  const [openComments, setOpenComments] = useState({});
+
   useEffect(() => {
     if (!accessToken) {
       router.push(`/login?from=${encodeURIComponent("/profile")}`);
       return;
     }
-
 
     if (!userId) {
       setError("Utilisateur non valide");
@@ -37,7 +45,7 @@ export default function Profile() {
     }
 
     fetchUserProfile(accessToken, userId)
-      .then(data => {
+      .then((data) => {
         setProfile(data);
         setFormData({
           displayName: data.displayName || "",
@@ -46,10 +54,9 @@ export default function Profile() {
           website: data.website || "",
         });
         setLoading(false);
-
         return fetchUserPosts(accessToken, userId);
-
-      }).then(userPosts => {
+      })
+      .then((userPosts) => {
         setPosts(userPosts);
         setLoading(false);
       })
@@ -57,36 +64,63 @@ export default function Profile() {
         setError("Erreur lors de la récupération du profil ou des posts.");
         setLoading(false);
       });
+  }, [accessToken, router, userId]);
 
-
-  }, [accessToken, router]);
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
-  if (!profile) return <div className="min-h-screen flex items-center justify-center">Profil introuvable.</div>;
+  if (loading)
+    return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
+  if (error)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
+    );
+  if (!profile)
+    return (
+      <div className="min-h-screen flex items-center justify-center">Profil introuvable.</div>
+    );
 
   const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002"}/profile-service/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!res.ok) throw new Error("Erreur mise à jour");
-      const updatedProfile = await res.json();
+      const updatedProfile = await updateUserProfile(accessToken, userId, formData);
       setProfile(updatedProfile);
       setEditMode(false);
     } catch {
       alert("Erreur lors de la mise à jour du profil");
     }
+  };
+
+  const handleLike = async (postId) => {
+    try {
+      const updatedPost = await toggleLike(accessToken, postId, userId);
+      setPosts((prev) => prev.map((p) => (p._id === postId ? updatedPost : p)));
+    } catch {
+      alert("Erreur lors du like");
+    }
+  };
+
+  const handleCommentChange = (postId, text) => {
+    setCommentInputs((prev) => ({ ...prev, [postId]: text }));
+  };
+
+  const handleCommentSubmit = async (postId, e) => {
+    e.preventDefault();
+    const text = commentInputs[postId];
+    if (!text || text.trim() === "") return;
+
+    try {
+      const updatedPost = await addReply(accessToken, postId, userId, text.trim());
+      setPosts((prev) => prev.map((p) => (p._id === postId ? updatedPost : p)));
+      setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
+    } catch {
+      alert("Erreur lors de l'ajout du commentaire");
+    }
+  };
+
+  const toggleCommentInput = (postId) => {
+    setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
   return (
@@ -131,24 +165,20 @@ export default function Profile() {
               )}
               {profile.website && (
                 <a
-                  href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
+                  href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 hover:underline"
                 >
                   <AiOutlineLink className="w-4 h-4" />
-                  {profile.website.replace(/^https?:\/\//, '')}
+                  {profile.website.replace(/^https?:\/\//, "")}
                 </a>
               )}
             </div>
 
             <div className="flex gap-8 mt-6 text-black font-semibold text-sm border-t border-gray-200 pt-4">
-              <div>
-                <span className="text-black">{profile.followers?.length || 0}</span> abonnés
-              </div>
-              <div>
-                <span className="text-black">{profile.following?.length || 0}</span> abonnements
-              </div>
+              <div><span>{profile.followers?.length || 0}</span> abonnés</div>
+              <div><span>{profile.following?.length || 0}</span> abonnements</div>
             </div>
 
             <div className="mt-8">
@@ -156,32 +186,92 @@ export default function Profile() {
               {posts.length === 0 ? (
                 <p className="text-gray-600">Aucun posts pour le moment.</p>
               ) : (
-                posts.map(post => (
-                  <div key={post._id} className="border-b border-gray-200 py-4">
-                    <p className="text-black">{post.content}</p>
-                    {post.media && post.media.length > 0 && (
-                      <div className="mt-2 flex gap-2 flex-wrap">
-                        {post.media.map((mediaItem, index) => (
-                          <img
-                            key={index}
-                            src={mediaItem.url}
-                            alt={mediaItem.type}
-                            className="w-32 h-32 object-cover rounded"
-                          />
-                        ))}
+                posts.map((post) => {
+                  const likedByUser = post.likes?.includes(userId);
+                  return (
+                    <div key={post._id} className="border-b border-gray-200 py-4">
+                      <p className="text-black font-semibold">
+                        {post.userId.displayName || post.userId.username}
+                      </p>
+                      <p className="text-black">{post.content}</p>
+                      {post.media && post.media.length > 0 && (
+                        <div className="mt-2 flex gap-2 flex-wrap">
+                          {post.media.map((mediaItem, index) => (
+                            <img key={index} src={mediaItem.url} alt={mediaItem.type} className="w-32 h-32 object-cover rounded" />
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between mt-3 text-gray-500 text-sm">
+                        <button
+                          onClick={() => toggleCommentInput(post._id)}
+                          className="flex items-center gap-1 hover:text-blue-500 transition"
+                        >
+                          <FaRegCommentDots className="w-5 h-5" />
+                          <span>{post.replies?.length || 0}</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleLike(post._id)}
+                          className={`flex items-center gap-1 ${likedByUser ? "text-red-500" : "hover:text-red-500"} transition`}
+                        >
+                          {likedByUser ? (
+                            <AiFillHeart className="w-5 h-5" />
+                          ) : (
+                            <AiOutlineHeart className="w-5 h-5" />
+                          )}
+                          <span>{post.likes?.length || 0}</span>
+                        </button>
                       </div>
-                    )}
-                    <p className="text-gray-500 text-xs mt-1">{new Date(post.createdAt).toLocaleString()}</p>
-                  </div>
-                ))
+
+                      {openComments[post._id] && (
+                        <>
+                          <div className="mt-3 max-h-40 overflow-y-auto border-t border-gray-100 pt-2">
+                            {post.replies && post.replies.length > 0 ? (
+                              post.replies.map((comment) => (
+                                <div key={comment._id || comment.createdAt} className="mb-2">
+                                  <span className="font-semibold text-black">
+                                    {comment.userId.displayName || comment.userId.username}
+                                  </span>
+                                  {" "} 
+                                  <span className="text-gray-700">{comment.content}</span>
+                                  <div className="text-gray-400 text-xs">{new Date(comment.createdAt).toLocaleString()}</div>
+                                </div>
+                              ))
+                            ) : (
+                              <p className="text-gray-400 text-sm">Pas encore de commentaires</p>
+                            )}
+                          </div>
+
+                          <form onSubmit={(e) => handleCommentSubmit(post._id, e)} className="mt-2 flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Répondre…"
+                              value={commentInputs[post._id] || ""}
+                              onChange={(e) => handleCommentChange(post._id, e.target.value)}
+                              className="flex-1 border border-gray-300 rounded-full px-4 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition">Envoyer</button>
+                          </form>
+                        </>
+                      )}
+
+                      <p className="text-gray-500 text-xs mt-1">{new Date(post.createdAt).toLocaleString()}</p>
+                    </div>
+                  );
+                })
               )}
             </div>
-
           </>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block font-semibold mb-1 text-black" htmlFor="displayName">Nom affiché</label>
+              <label
+                className="block font-semibold mb-1 text-black"
+                htmlFor="displayName"
+              >
+                Nom affiché
+              </label>
               <input
                 id="displayName"
                 name="displayName"
@@ -191,7 +281,12 @@ export default function Profile() {
               />
             </div>
             <div>
-              <label className="block font-semibold mb-1 text-black" htmlFor="bio">Bio</label>
+              <label
+                className="block font-semibold mb-1 text-black"
+                htmlFor="bio"
+              >
+                Bio
+              </label>
               <textarea
                 id="bio"
                 name="bio"
@@ -202,7 +297,12 @@ export default function Profile() {
               />
             </div>
             <div>
-              <label className="block font-semibold mb-1 text-black" htmlFor="location">Lieu</label>
+              <label
+                className="block font-semibold mb-1 text-black"
+                htmlFor="location"
+              >
+                Lieu
+              </label>
               <input
                 id="location"
                 name="location"
@@ -212,7 +312,12 @@ export default function Profile() {
               />
             </div>
             <div>
-              <label className="block font-semibold mb-1 text-black" htmlFor="website">Site web</label>
+              <label
+                className="block font-semibold mb-1 text-black"
+                htmlFor="website"
+              >
+                Site web
+              </label>
               <input
                 id="website"
                 name="website"

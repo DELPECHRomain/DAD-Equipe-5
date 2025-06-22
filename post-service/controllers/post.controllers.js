@@ -18,7 +18,7 @@ exports.createPost = async (req, res) => {
 
     // Création du post
     const post = new Post({
-      userId,                              
+      userId,
       content: content.trim(),
       media: Array.isArray(media) ? media : [],
       likes: [],
@@ -39,7 +39,10 @@ exports.createPost = async (req, res) => {
 // Récupérer tous les posts
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 });
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .populate("userId", "username displayName")
+      .populate("replies.userId", "username displayName");
     res.json(posts);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -49,7 +52,10 @@ exports.getAllPosts = async (req, res) => {
 // Récupérer les posts d’un utilisateur
 exports.getPostsByUser = async (req, res) => {
   try {
-    const posts = await Post.find({ userId: req.params.userId }).sort({ createdAt: -1 });
+    const posts = await Post.find({ userId: req.params.userId })
+      .sort({ createdAt: -1 })
+      .populate("userId", "username displayName")
+      .populate("replies.userId", "username displayName");
     res.json(posts);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -64,15 +70,22 @@ exports.addReply = async (req, res) => {
 
     post.replies.push({
       userId: req.body.userId,
-      content: req.body.content
+      content: req.body.content,
     });
 
     await post.save();
-    res.status(201).json(post);
+
+    // Recharger le post avec les infos utilisateur peuplées avant de renvoyer
+    const populatedPost = await Post.findById(post._id)
+      .populate("userId", "username displayName")
+      .populate("replies.userId", "username displayName");
+
+    res.status(201).json(populatedPost);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // Ajouter / retirer un like
 exports.toggleLike = async (req, res) => {
@@ -108,7 +121,9 @@ exports.getPostsByFollowing = async (req, res) => {
 
     // Recherche posts où userId est dans la liste followingIds, triés du plus récent au plus ancien
     const posts = await Post.find({ userId: { $in: followingIds } })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .populate("userId", "username displayName")
+      .populate("replies.userId", "username displayName");
 
     res.json(posts);
   } catch (err) {

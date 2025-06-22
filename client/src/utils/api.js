@@ -98,3 +98,44 @@ export const createPost = async (token, userId, content, media = []) => {
     throw error;
   }
 };
+
+
+export const updateUserProfile = async (token, userId, data) => {
+  try {
+    const response = await profileClient.put(`/profile-service/${userId}`, data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const toggleLike = async (token, postId, userId) => {
+  try {
+    const response = await postClient.post(
+      `/post-service/posts/${postId}/like`,
+      { userId },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const addReply = async (token, postId, userId, content) => {
+  try {
+    const response = await postClient.post(
+      `/post-service/posts/${postId}/replies`,
+      { userId, content },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

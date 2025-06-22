@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const replySchema = new mongoose.Schema({
   replyId: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true , ref: 'User'},
   content: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
 }, { _id: false });
