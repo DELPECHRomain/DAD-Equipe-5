@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
@@ -54,27 +54,33 @@ export default function LoginClient() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="max-w-md w-full bg-gray-50 p-8 rounded-lg shadow-md">
-        <Image
-          src="/breezy-logo.png"
-          alt="Logo"
-          width={80}
-          height={80}
-          className="mx-auto mb-6"
-        />
-        <h1 className="text-4xl font-semibold mb-6 text-left text-black">
-          Connectez-vous
-        </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="flex min-h-screen bg-gray-200 text-white">
+      <div className="hidden md:flex w-1/2 items-center justify-center bg-gray-200 ml-64">
+        <Image
+          src="/breezy-logo.svg"
+          alt="Logo"
+          width={400}
+          height={400}
+          className="w-[45%] h-[45%] text-white fill-current"
+          priority
+        />
+      </div>
+
+      <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-8">
+        <h1 className="text-5xl font-bold mb-6 text-black">Connectez-vous</h1>
+        <p className="text-gray-400 text-lg mb-8 text-center">
+          Retrouvez la brise et suivez ce qui vous intéresse.
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-5 w-full max-w-sm">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="Adresse mail"
-            className="border-indigo-800 text-black w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-white border-indigo-800 text-black w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="password"
@@ -82,33 +88,37 @@ export default function LoginClient() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="Mot de passe"
-            className="border-indigo-800 text-black w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-white border-indigo-800 text-black w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+
           <button
             type="submit"
-            disabled={loading}
-            className={`text-white w-full py-2 rounded-3xl font-semibold ${loading
-              ? 'bg-indigo-800 cursor-not-allowed'
-              : 'bg-indigo-800 hover:bg-blue-700'
-              }`}
-          >
-            {loading ? 'Connexion en cours...' : 'Connexion'}
+            className="w-full py-3 rounded-full text-white font-semibold 
+                 bg-indigo-800 cursor-pointer hover:bg-indigo-700">
+            Connexion
           </button>
+
+          {error && (
+            <p className="text-black mt-4 text-red-600 text-center font-medium">
+              {error}
+            </p>
+          )}
         </form>
 
-        {error && (
-          <p className="text-red-600 mt-8 text-center font-medium">{error}</p>
-        )}
+        <div className="flex items-center my-6 w-full max-w-sm">
+          <div className="flex-grow border-t border-gray-300"></div>
+          <span className="mx-4 text-gray-600 font-semibold">ou</span>
+          <div className="flex-grow border-t border-gray-300"></div>
+        </div>
 
-        <p className="text-black mt-2">
-          Vous n'avez pas de compte ?{' '}
-          <Link
-            href={`/register${from ? `?from=${encodeURIComponent(from)}` : '/'}`}
-            className="text-indigo-800 hover:underline"
-          >
-            Inscrivez-vous
-          </Link>
-        </p>
+        <Link
+          href={`/register${from ? `?from=${encodeURIComponent(from)}` : "/"}`}
+          className="w-full max-w-sm"
+        >
+          <button className="w-full py-3 px-4 rounded-full bg-white border text-indigo-800 border-indigo-800 font-semibold hover:bg-indigo-50 transition cursor-pointer">
+            S'inscrire
+          </button>
+        </Link>
       </div>
     </div>
   );

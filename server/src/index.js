@@ -25,14 +25,14 @@ app.get('/users', (req, res) => {
     .catch(err => res.json(err));
 });
 
-app.use('/auth', UserRouter);
+app.use('/auth-service', UserRouter);
 
 const usersRouter = require('./routes/user_routes.js');
 app.use('/users', usersRouter);
 
 const port = process.env.PORT || 3000;
 
-mongoose.connect("mongodb://localhost:27017/bddTest")
+mongoose.connect("mongodb://mongo:27017/bddTest")
 .then(() => console.log("Connection to the db successful"))
 .catch(err => console.error("Error connecting to the db:", err));
 
