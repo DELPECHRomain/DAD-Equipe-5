@@ -10,6 +10,11 @@ const profileClient = axios.create({
   timeout: 5000,
 });
 
+const postClient = axios.create({
+  baseURL: "http://localhost:3003",
+  timeout: 5000,
+});
+
 
 export const loginUser = async (email, password) => {
   try {
@@ -41,6 +46,53 @@ export const fetchUserProfile = async (token, userId) => {
     const response = await profileClient.get(`/profile-service/${userId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+export const fetchUserPosts = async (token, userId) => {
+  try {
+    const response = await postClient.get(`/post-service/posts/user/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const fetchFollowingPosts = async (token, followingIds) => {
+  try {
+    const response = await postClient.post(`/post-service/posts/following`, {
+      followingIds
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+export const createPost = async (token, userId, content, media = []) => {
+  try {
+    const response = await postClient.post(
+      `/post-service/posts`,
+      {
+        userId,
+        content: content.trim(),
+        media,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     throw error;

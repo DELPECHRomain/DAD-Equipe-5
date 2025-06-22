@@ -32,6 +32,19 @@ services:
     networks:
       - my-network
 
+  post-service:
+    build:
+      context: ./post-service
+    ports:
+      - '3003:3003'
+    env_file:
+      - ./post-service/.env
+    depends_on:
+      - mongo
+    networks:
+      - my-network
+  
+
   client:
     build:
       context: ./client

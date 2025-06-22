@@ -3,81 +3,94 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { fetchUserProfile } from "@/utils/api";
 
 export default function HomeConnected() {
-    const { accessToken, isLoading } = useAuth();
-    const router = useRouter();
-    const [posts, setPosts] = useState([]);
+  const { accessToken, isLoading, userId } = useAuth();
+  const router = useRouter();
+  const [posts, setPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
 
-    useEffect(() => {
-        if (!accessToken && !isLoading) {
-          router.push("/login");
-        }
 
-        // Simuler des posts récupérés en BDD
-        setPosts([
-            {
-                id: 1,
-                username: "john_doe",
-                content: "Bienvenue sur Breezy ! 🌬️",
-                createdAt: "Il y a 2 min",
-            },
-            {
-                id: 2,
-                username: "dev_girl",
-                content: "J'adore cette plateforme ! ❤️ #frontend",
-                createdAt: "Il y a 10 min",
-            },
-        ]);
-    }, [accessToken, isLoading, router]);
-
-    useEffect(() => {
-        if (!isLoading && !accessToken) {
-            router.push(`/login?from=${encodeURIComponent("/home")}`);
-        }
-    }, [accessToken, isLoading, router]);
-
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-gray-600">Loading...</p>
-            </div>
-        );
+  useEffect(() => {
+    if (!accessToken && !isLoading) {
+      router.push("/login");
+      return;
     }
 
-    if (!accessToken) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="text-gray-600">Redirecting to login...</p>
-            </div>
-        );
-    }
+    if (accessToken && userId) {
+      fetchUserProfile(accessToken, userId)
+        .then((profile) => {
+          const followingIds = profile.following || [];
 
+          if (followingIds.length === 0) {
+            setPosts([]);
+            setLoadingPosts(false);
+            return;
+          }
+
+          return fetchFollowingPosts(accessToken, followingIds)
+            .then((fetchedPosts) => {
+              setPosts(fetchedPosts);
+              setLoadingPosts(false);
+            });
+        })
+        .catch((error) => {
+          console.error("Erreur lors du chargement :", error);
+          setLoadingPosts(false);
+        });
+    }
+  }, [accessToken, isLoading, userId, router]);
+
+  useEffect(() => {
+    if (!isLoading && !accessToken) {
+      router.push(`/login?from=${encodeURIComponent("/home")}`);
+    }
+  }, [accessToken, isLoading, router]);
+
+  if (isLoading || loadingPosts) {
     return (
-        <div className="flex bg-white min-h-screen text-black">
-            
-      <main className="flex-1 md:ml-64 max-w-2xl border-x border-gray-200 min-h-screen">
-        <header className="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-          <h1 className="text-2xl font-bold">Accueil</h1>
-        </header>
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Chargement...</p>
+      </div>
+    );
+  }
 
-        {posts.map((post) => (
-          <div key={post.id} className="p-4 border-b border-gray-200">
+  if (!accessToken) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-600">Redirecting to login...</p>
+      </div>
+    );
+  }
+
+  return (<div className="flex bg-white min-h-screen text-black">
+    <main className="flex-1 md:ml-64 max-w-2xl border-x border-gray-200 min-h-screen">
+      <header className="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+        <h1 className="text-2xl font-bold">Accueil</h1>
+      </header>
+
+      {posts.length === 0 ? (
+        <div className="p-4 text-gray-600">Aucun posts pour le moment.</div>
+      ) : (
+        posts.map((post) => (
+          <div key={post._id} className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <span className="font-semibold">{post.username}</span>
-              <span className="text-gray-500 text-sm">{post.createdAt}</span>
+              <span className="text-gray-500 text-sm">{new Date(post.createdAt).toLocaleString()}</span>
             </div>
             <p className="mt-2 text-gray-800">{post.content}</p>
           </div>
-        ))}
-      </main>
+        ))
+      )}
+    </main>
 
-      <aside className="hidden lg:block w-80 p-4">
-        <div className="bg-gray-100 rounded-xl p-4">
-          <h2 className="font-bold text-lg mb-3">Suggestions</h2>
-          <p className="text-sm text-gray-600">Aucun contenu pour le moment.</p>
-        </div>
-      </aside>
-    </div>
-    );
+    <aside className="hidden lg:block w-80 p-4">
+      <div className="bg-gray-100 rounded-xl p-4">
+        <h2 className="font-bold text-lg mb-3">Suggestions</h2>
+        <p className="text-sm text-gray-600">Aucun contenu pour le moment.</p>
+      </div>
+    </aside>
+  </div>
+  );
 }

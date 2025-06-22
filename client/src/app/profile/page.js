@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { fetchUserProfile } from "@/utils/api";
+import { fetchUserProfile, fetchUserPosts } from "@/utils/api";
 import { AiOutlineEnvironment, AiOutlineLink } from "react-icons/ai";
 
 export default function Profile() {
@@ -13,6 +13,7 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [posts, setPosts] = useState([]);
 
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
@@ -45,11 +46,19 @@ export default function Profile() {
           website: data.website || "",
         });
         setLoading(false);
+
+        return fetchUserPosts(accessToken, userId);
+
+      }).then(userPosts => {
+        setPosts(userPosts);
+        setLoading(false);
       })
       .catch(() => {
-        setError("Erreur lors de la récupération du profil.");
+        setError("Erreur lors de la récupération du profil ou des posts.");
         setLoading(false);
       });
+
+
   }, [accessToken, router]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Chargement...</div>;
@@ -141,6 +150,33 @@ export default function Profile() {
                 <span className="text-black">{profile.following?.length || 0}</span> abonnements
               </div>
             </div>
+
+            <div className="mt-8">
+              <h2 className="text-xl font-bold text-black mb-4">Mes posts</h2>
+              {posts.length === 0 ? (
+                <p className="text-gray-600">Aucun posts pour le moment.</p>
+              ) : (
+                posts.map(post => (
+                  <div key={post._id} className="border-b border-gray-200 py-4">
+                    <p className="text-black">{post.content}</p>
+                    {post.media && post.media.length > 0 && (
+                      <div className="mt-2 flex gap-2 flex-wrap">
+                        {post.media.map((mediaItem, index) => (
+                          <img
+                            key={index}
+                            src={mediaItem.url}
+                            alt={mediaItem.type}
+                            className="w-32 h-32 object-cover rounded"
+                          />
+                        ))}
+                      </div>
+                    )}
+                    <p className="text-gray-500 text-xs mt-1">{new Date(post.createdAt).toLocaleString()}</p>
+                  </div>
+                ))
+              )}
+            </div>
+
           </>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
