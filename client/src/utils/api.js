@@ -166,3 +166,19 @@ export const toggleFollow = async (token, currentUserId, userIdToFollow) => {
     throw error;
   }
 };
+export const uploadProfileImages = async (token, userId, formData) => {
+  try {
+    const response = await profileClient.put(
+      `/profile-service/${userId}/images`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data; 
+  } catch (err) {
+    throw err;
+  }
+};
