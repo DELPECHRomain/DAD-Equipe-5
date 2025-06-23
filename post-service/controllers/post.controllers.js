@@ -1,22 +1,72 @@
 const Post = require('../models/Post.js');
-const User = require('../models/User.js');
+const axios = require('axios');
+require('dotenv').config();
+
+const PROFILE_SERVICE_URL = 'http://profile-service:3001/profile-service';
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3000/user-service';
+
+// Helper pour récupérer un profil utilisateur
+const getUserProfile = async (userId) => {
+  try {
+    const response = await axios.get(`${PROFILE_SERVICE_URL}/user/${userId}`);
+    return response.data;
+  } catch (err) {
+    return null;
+  }
+};
+
+const getUserById = async (userId) => {
+  try {
+    const response = await axios.get(`${USER_SERVICE_URL}/${userId}`);
+    return response.data;
+  } catch (err) {
+    return null;
+  }
+};
+
+function addReplyToComment(replies, parentReplyId, newReply) {
+  for (let reply of replies) {
+    if (reply.replyId.toString() === parentReplyId.toString()) {
+      reply.replies.push(newReply);
+      return true; // ajouté avec succès
+    }
+    // chercher récursivement dans les sous-replies
+    if (reply.replies && reply.replies.length > 0) {
+      if (addReplyToComment(reply.replies, parentReplyId, newReply)) {
+        return true;
+      }
+    }
+  }
+  return false; // non trouvé
+}
+
+
+const getFullUserData = async (userId) => {
+  const [user, profile] = await Promise.all([getUserById(userId), getUserProfile(userId)]);
+  if (!user && !profile) return null;
+
+  return {
+    username: user?.username || null,
+    displayName: profile?.displayName || null,
+    // tu peux ajouter d'autres champs fusionnés ici
+  };
+};
+
 
 // Créer un post
 exports.createPost = async (req, res) => {
   try {
     const { userId, content, media } = req.body;
 
-    // Validation basique
     if (!userId || !content) {
       return res.status(400).json({ message: "userId et content sont requis." });
     }
 
-    const user = await User.findById(userId);
+    const user = await getUserProfile(userId);
     if (!user) {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
 
-    // Création du post
     const post = new Post({
       userId,
       content: content.trim(),
@@ -26,7 +76,6 @@ exports.createPost = async (req, res) => {
     });
 
     await post.save();
-
     res.status(201).json(post);
 
   } catch (err) {
@@ -35,15 +84,30 @@ exports.createPost = async (req, res) => {
   }
 };
 
-
 // Récupérer tous les posts
 exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find()
-      .sort({ createdAt: -1 })
-      .populate("userId", "username displayName")
-      .populate("replies.userId", "username displayName");
-    res.json(posts);
+    const posts = await Post.find().sort({ createdAt: -1 });
+
+    const postsWithUserData = await Promise.all(posts.map(async (post) => {
+      const user = await getUserProfile(post.userId);
+      const repliesWithUser = await Promise.all(post.replies.map(async (reply) => {
+        const replyUser = await getUserProfile(reply.userId);
+        return {
+          ...reply.toObject(),
+          user: replyUser ? { username: replyUser.username, displayName: replyUser.displayName } : null
+        };
+      }));
+
+      return {
+        ...post.toObject(),
+        user: user ? { username: user.username, displayName: user.displayName } : null,
+        replies: repliesWithUser
+      };
+    }));
+
+    res.json(postsWithUserData);
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -52,35 +116,27 @@ exports.getAllPosts = async (req, res) => {
 // Récupérer les posts d’un utilisateur
 exports.getPostsByUser = async (req, res) => {
   try {
-    const posts = await Post.find({ userId: req.params.userId })
-      .sort({ createdAt: -1 })
-      .populate("userId", "username displayName")
-      .populate("replies.userId", "username displayName");
-    res.json(posts);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+    const posts = await Post.find({ userId: req.params.userId }).sort({ createdAt: -1 });
+    const user = await getFullUserData(req.params.userId);
 
-// Ajouter une réponse à un post
-exports.addReply = async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.postId);
-    if (!post) return res.status(404).json({ message: "Post introuvable" });
+    const postsWithUserData = await Promise.all(posts.map(async (post) => {
+      const repliesWithUser = await Promise.all(post.replies.map(async (reply) => {
+        const replyUser = await getFullUserData(reply.userId);
+        return {
+          ...reply.toObject(),
+          user: replyUser || null
+        };
+      }));
 
-    post.replies.push({
-      userId: req.body.userId,
-      content: req.body.content,
-    });
+      return {
+        ...post.toObject(),
+        user: user ? { username: user.username, displayName: user.displayName } : null,
+        replies: repliesWithUser
+      };
+    }));
 
-    await post.save();
+    res.json(postsWithUserData);
 
-    // Recharger le post avec les infos utilisateur peuplées avant de renvoyer
-    const populatedPost = await Post.findById(post._id)
-      .populate("userId", "username displayName")
-      .populate("replies.userId", "username displayName");
-
-    res.status(201).json(populatedPost);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -89,12 +145,11 @@ exports.addReply = async (req, res) => {
 
 exports.toggleLike = async (req, res) => {
   try {
+    const { userId } = req.body;
     const post = await Post.findById(req.params.postId);
     if (!post) return res.status(404).json({ message: "Post introuvable" });
 
-    const userId = req.body.userId;
     const index = post.likes.indexOf(userId);
-
     if (index === -1) {
       post.likes.push(userId);
     } else {
@@ -103,19 +158,73 @@ exports.toggleLike = async (req, res) => {
 
     await post.save();
 
-    const populatedPost = await Post.findById(post._id)
-      .populate("userId", "username displayName")
-      .populate("replies.userId", "username displayName");
+    // Récupérer post enrichi avant de renvoyer
+    const enrichedPost = await Post.findById(post._id);
 
-    res.status(200).json(populatedPost);
+    const enrichedReplies = await Promise.all(enrichedPost.replies.map(async (reply) => {
+      const replyUser = await getFullUserData(reply.userId);
+      return {
+        ...reply.toObject(),
+        user: replyUser || null
+      };
+    }));
+
+    const postUser = await getFullUserData(enrichedPost.userId);
+
+    res.status(200).json({
+      ...enrichedPost.toObject(),
+      user: postUser || null,
+      replies: enrichedReplies
+    });
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 
+exports.addReply = async (req, res) => {
+  try {
+    const { userId, content } = req.body;
+    const post = await Post.findById(req.params.postId);
+    if (!post) return res.status(404).json({ message: "Post introuvable" });
 
-// Récupérer les posts des utilisateurs suivis (followingIds)
+    const user = await getFullUserData(userId);
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
+
+    post.replies.push({
+      userId,
+      content
+    });
+
+    await post.save();
+
+    // Récupérer post enrichi avant de renvoyer
+    const enrichedPost = await Post.findById(post._id);
+
+    const enrichedReplies = await Promise.all(enrichedPost.replies.map(async (reply) => {
+      const replyUser = await getFullUserData(reply.userId);
+      return {
+        ...reply.toObject(),
+        user: replyUser || null
+      };
+    }));
+
+    const postUser = await getFullUserData(enrichedPost.userId);
+
+    res.status(201).json({
+      ...enrichedPost.toObject(),
+      user: postUser || null,
+      replies: enrichedReplies
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+// Récupérer les posts des utilisateurs suivis
 exports.getPostsByFollowing = async (req, res) => {
   try {
     const { followingIds } = req.body;
@@ -124,16 +233,29 @@ exports.getPostsByFollowing = async (req, res) => {
       return res.status(400).json({ message: "followingIds doit être un tableau non vide" });
     }
 
-    // Recherche posts où userId est dans la liste followingIds, triés du plus récent au plus ancien
-    const posts = await Post.find({ userId: { $in: followingIds } })
-      .sort({ createdAt: -1 })
-      .populate("userId", "username displayName")
-      .populate("replies.userId", "username displayName");
+    const posts = await Post.find({ userId: { $in: followingIds } }).sort({ createdAt: -1 });
 
-    res.json(posts);
+    const postsWithUserData = await Promise.all(posts.map(async (post) => {
+      const user = await getFullUserData(post.userId);
+
+      const repliesWithUser = await Promise.all(post.replies.map(async (reply) => {
+        const replyUser = await getFullUserData(reply.userId);
+        return {
+          ...reply.toObject(),
+          user: replyUser || null
+        };
+      }));
+
+      return {
+        ...post.toObject(),
+        user: user || null,
+        replies: repliesWithUser
+      };
+    }));
+
+    res.json(postsWithUserData);
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
-

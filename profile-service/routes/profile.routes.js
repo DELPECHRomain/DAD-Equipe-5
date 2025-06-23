@@ -4,10 +4,10 @@ const profileController = require('../controllers/profile.controller');
 router.post('/follow', profileController.followUser);
 router.get('/search', profileController.searchProfiles);
 
-router.get('/:userId', profileController.getProfile);
+router.get('/user/:userId', profileController.getProfile);
 router.post('/', profileController.createProfile);
-router.put('/:userId', profileController.updateProfile);
-router.delete('/:userId', profileController.deleteProfile);
+router.put('/user/:userId', profileController.updateProfile);
+router.delete('/user/:userId', profileController.deleteProfile);
 
 
 

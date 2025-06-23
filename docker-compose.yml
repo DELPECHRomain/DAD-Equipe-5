@@ -44,6 +44,17 @@ services:
     networks:
       - my-network
   
+  user-service:
+    build:
+      context: ./user-service
+    ports:
+      - '3004:3000'
+    env_file:
+      - ./user-service/.env
+    depends_on:
+      - mongo
+    networks:
+      - my-network
 
   client:
     build:
@@ -63,6 +74,7 @@ services:
       - '8080:8080'
     depends_on:
       - auth-service
+      - user-service
       - client
     networks:
       - my-network

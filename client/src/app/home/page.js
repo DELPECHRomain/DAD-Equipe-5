@@ -157,7 +157,7 @@ export default function HomeConnected() {
             return (
               <div key={post._id} className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold">{post.userId?.username}</span>
+                  <span className="font-semibold text-black">@{post.user?.username}</span>
                   <span className="text-gray-500 text-sm">
                     {new Date(post.createdAt).toLocaleString()}
                   </span>
@@ -194,7 +194,7 @@ export default function HomeConnected() {
                         post.replies.map((comment) => (
                           <div key={comment._id || comment.createdAt} className="mb-2">
                             <span className="font-semibold text-black">
-                              {comment.userId?.displayName || comment.userId?.username || "Anonyme"}
+                              @{comment.user?.username}
                             </span>{" "}
                             <span className="text-gray-700">{comment.content}</span>
                             <div className="text-gray-400 text-xs">

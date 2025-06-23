@@ -1,18 +1,36 @@
 const Profile = require('../models/Profile.js');
-const User = require('../models/User.js');
+const mongoose = require('mongoose');
+const axios = require('axios');
+require('dotenv').config();
 
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3000/user-service';
+
+// Helper pour récupérer un user par ID
+const getUserById = async (userId) => {
+  try {
+    const response = await axios.get(`${USER_SERVICE_URL}/${userId}`);
+    return response.data;
+  } catch (err) {
+    return null;
+  }
+};
+
+// GET profile + user info
 exports.getProfile = async (req, res) => {
   try {
-    const profile = await Profile.findOne({ userId: req.params.userId })
-      .populate('userId', 'username'); 
-
+    const profile = await Profile.findOne({ userId: req.params.userId });
     if (!profile) return res.status(404).json({ message: 'Profile not found' });
-    res.json(profile);
+
+    const user = await getUserById(profile.userId);
+
+    res.json({
+      ...profile.toObject(),
+      user: user ? { _id: user._id, username: user.username } : null
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
 
 // CREATE profile
 exports.createProfile = async (req, res) => {
@@ -33,12 +51,21 @@ exports.updateProfile = async (req, res) => {
       req.body,
       { new: true }
     );
+
     if (!profile) return res.status(404).json({ message: 'Profile not found' });
-    res.json(profile);
+
+    const user = await getUserById(profile.userId);
+
+    res.json({
+      ...profile.toObject(),
+      user: user ? { _id: user._id, username: user.username } : null
+    });
+
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 // DELETE profile
 exports.deleteProfile = async (req, res) => {
@@ -51,63 +78,49 @@ exports.deleteProfile = async (req, res) => {
   }
 };
 
+// SEARCH profiles
 exports.searchProfiles = async (req, res) => {
-  
   const query = req.query.query || "";
 
   try {
     if (query === "") {
-      // Retourne les 5 premiers profils avec username
       const profiles = await Profile.find({})
         .sort({ createdAt: 1 })
-        .limit(5)
-        .populate('userId', 'username');
+        .limit(5);
 
-      return res.json(profiles);
+      const profilesWithUser = await Promise.all(profiles.map(async (profile) => {
+        const user = await getUserById(profile.userId);
+        return {
+          ...profile.toObject(),
+          user: user ? { _id: user._id, username: user.username } : null
+        };
+      }));
+
+      return res.json(profilesWithUser);
     }
 
-    const regexQuery = new RegExp(query, "i");
+    const userResponse = await axios.get(`${USER_SERVICE_URL}/search`, {
+      params: { query }
+    });
 
-    const profiles = await Profile.aggregate([
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "user"
-        }
-      },
-      { $unwind: "$user" },
-      {
-        $match: {
-          $or: [
-            { "user.username": { $regex: regexQuery } },
-            { "displayName": { $regex: regexQuery } }
-          ]
-        }
-      },
-      { $limit: 10 },
-      {
-        $project: {
-          userId: 1,
-          displayName: 1,
-          bio: 1,
-          profileImage: 1,
-          bannerImage: 1,
-          location: 1,
-          website: 1,
-          followers: 1,
-          following: 1,
-          createdAt: 1,
-          user: {
-            _id: 1,
-            username: 1
-          }
-        }
-      }
-    ]);
+    const matchingUserIds = userResponse.data.map(user => user._id);
 
-    res.json(profiles);
+    const profiles = await Profile.find({
+      $or: [
+        { userId: { $in: matchingUserIds } },
+        { displayName: { $regex: new RegExp(query, 'i') } }
+      ]
+    }).limit(10);
+
+    const profilesWithUser = await Promise.all(profiles.map(async (profile) => {
+      const user = await getUserById(profile.userId);
+      return {
+        ...profile.toObject(),
+        user: user ? { _id: user._id, username: user.username } : null
+      };
+    }));
+
+    res.json(profilesWithUser);
 
   } catch (err) {
     console.error(err);
@@ -127,21 +140,28 @@ exports.followUser = async (req, res) => {
       return res.status(400).json({ message: "Vous ne pouvez pas vous suivre vous-même." });
     }
 
-    const currentUserProfile = await Profile.findOne({ userId: currentUserId });
-    const targetUserProfile = await Profile.findOne({ userId: userIdToFollow });
+    if (!mongoose.Types.ObjectId.isValid(currentUserId) || !mongoose.Types.ObjectId.isValid(userIdToFollow)) {
+      return res.status(400).json({ message: "ID utilisateur invalide." });
+    }
+
+    const currentUserObjectId = new mongoose.Types.ObjectId(currentUserId);
+    const userToFollowObjectId = new mongoose.Types.ObjectId(userIdToFollow);
+
+    const currentUserProfile = await Profile.findOne({ userId: currentUserObjectId });
+    const targetUserProfile = await Profile.findOne({ userId: userToFollowObjectId });
 
     if (!currentUserProfile || !targetUserProfile) {
       return res.status(404).json({ message: "Profil introuvable." });
     }
 
-    const isFollowing = currentUserProfile.following.includes(userIdToFollow);
+    const isFollowing = currentUserProfile.following.some(followedId => followedId.equals(userToFollowObjectId));
 
     if (isFollowing) {
-      currentUserProfile.following.pull(userIdToFollow);
-      targetUserProfile.followers.pull(currentUserId);
+      currentUserProfile.following.pull(userToFollowObjectId);
+      targetUserProfile.followers.pull(currentUserObjectId);
     } else {
-      currentUserProfile.following.push(userIdToFollow);
-      targetUserProfile.followers.push(currentUserId);
+      currentUserProfile.following.push(userToFollowObjectId);
+      targetUserProfile.followers.push(currentUserObjectId);
     }
 
     await currentUserProfile.save();
@@ -152,4 +172,3 @@ exports.followUser = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-

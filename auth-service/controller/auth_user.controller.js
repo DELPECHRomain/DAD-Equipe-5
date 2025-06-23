@@ -1,14 +1,14 @@
-const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Auth_User = require('../models/Auth_User.js');
-const User = require('../models/User.js');
-const Profile = require('../models/Profile.js');
+const axios = require('axios');
+require('dotenv').config();
 
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3000/user-service';
+const PROFILE_SERVICE_URL = 'http://profile-service:3001/profile-service';
 
 module.exports = {
 
-  // REGISTER
   register: async (req, res) => {
     try {
       const { username, email, password } = req.body;
@@ -18,23 +18,25 @@ module.exports = {
         return res.status(400).json({ message: "Un compte existe déjà avec cet email." });
       }
 
-      const usernameAlreadyExists = await User.findOne({ username });
-      if (usernameAlreadyExists) {
+      const userExistsRes = await axios.get(`${USER_SERVICE_URL}/check-username`, {
+        params: { username }
+      });
+
+      if (userExistsRes.data.exists) {
         return res.status(400).json({ message: "Ce nom d'utilisateur est déjà pris." });
       }
 
       const passwordHash = await bcrypt.hash(password, 10);
 
-      const newUser = new User({
+      const userResponse = await axios.post(`${USER_SERVICE_URL}/create`, {
         username,
-        email,
-        createdAt: new Date(),
-        isVerified: false
+        email
       });
-      await newUser.save();
+
+      const userId = userResponse.data.userId;
 
       const newAuth = new Auth_User({
-        userId: newUser._id,
+        userId,
         email,
         passwordHash,
         createdAt: new Date(),
@@ -43,8 +45,8 @@ module.exports = {
       });
       await newAuth.save();
 
-      const newProfile = new Profile({
-        userId: newUser._id,
+      await axios.post(`${PROFILE_SERVICE_URL}/`, {
+        userId: userId,
         displayName: username,
         bio: "",
         profileImage: "",
@@ -55,12 +57,13 @@ module.exports = {
         following: [],
         createdAt: new Date()
       });
-      await newProfile.save();
+
 
       return res.status(201).json({ status: true, message: "Compte créé avec succès." });
 
     } catch (error) {
-      res.json({ error });
+      console.error(error);
+      res.status(500).json({ error: error.message });
     }
   },
 
@@ -78,17 +81,15 @@ module.exports = {
         return res.status(401).json({ message: "Email ou mot de passe incorrect." });
       }
 
-      const user = await User.findById(authUser.userId);
-      if (!user) {
-        return res.status(401).json({ message: "Utilisateur non trouvé." });
-      }
+      const userResponse = await axios.get(`${USER_SERVICE_URL}/${authUser.userId}`);
+      const username = userResponse.data.username;
 
       authUser.lastLogin = new Date();
       await authUser.save();
 
-      const key = "jwttokenkey";
+      const key = process.env.JWT_SECRET || "jwttokenkey";
       const token = jwt.sign(
-        { userId: authUser.userId, roles: authUser.roles, username: user.username },
+        { userId: authUser.userId, roles: authUser.roles, username },
         key,
         { expiresIn: '1h' }
       );
@@ -103,9 +104,8 @@ module.exports = {
 
     } catch (error) {
       console.error(error);
-      res.json({ error });
+      res.status(500).json({ error: error.message });
     }
   }
-
 
 };

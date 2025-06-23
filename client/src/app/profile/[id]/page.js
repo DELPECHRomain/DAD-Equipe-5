@@ -45,7 +45,7 @@ export default function Profile() {
 
   const handleToggleFollow = async () => {
     try {
-      const result = await toggleFollow(accessToken, userId, profile.userId._id);
+      const result = await toggleFollow(accessToken, userId, profileId);
       setIsFollowing(result.following);
 
       const updatedProfile = await fetchUserProfile(accessToken, profileId);
@@ -109,6 +109,7 @@ export default function Profile() {
     try {
       const updatedProfile = await updateUserProfile(accessToken, userId, formData);
       setProfile(updatedProfile);
+      console.log(profile);
       setEditMode(false);
     } catch {
       alert("Erreur lors de la mise à jour du profil");
@@ -175,7 +176,7 @@ export default function Profile() {
         {!editMode ? (
           <>
             <h1 className="text-2xl text-black font-bold">{profile.displayName}</h1>
-            <p className="text-black">@{profile.userId.username}</p>
+            <p className="text-black">@{profile.user?.username}</p>
 
 
             {profile.bio && <p className="mt-3 text-black">{profile.bio}</p>}
@@ -222,11 +223,12 @@ export default function Profile() {
                 <p className="text-gray-600">Aucun posts pour le moment.</p>
               ) : (
                 posts.map((post) => {
+                  console.log(post)
                   const likedByUser = post.likes?.includes(userId);
                   return (
                     <div key={post._id} className="border-b border-gray-200 py-4">
                       <p className="text-black font-semibold">
-                        {post.userId.displayName || post.userId.username}
+                        @{post.user?.username}
                       </p>
                       <p className="text-black">{post.content}</p>
                       {post.media && post.media.length > 0 && (
@@ -266,7 +268,7 @@ export default function Profile() {
                               post.replies.map((comment) => (
                                 <div key={comment._id || comment.createdAt} className="mb-2">
                                   <span className="font-semibold text-black">
-                                    {comment.userId.displayName || comment.userId.username}
+                                    @{comment.user?.username}
                                   </span>
                                   {" "}
                                   <span className="text-gray-700">{comment.content}</span>

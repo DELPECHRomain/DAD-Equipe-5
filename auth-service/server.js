@@ -14,7 +14,7 @@ app.use(cors({
   credentials: true
 }));
 
-mongoose.connect("mongodb://mongo:27017/bddTest")
+mongoose.connect("mongodb://mongo:27017/auth-db")
   .then(() => console.log("Connection to the db successful"))
   .catch(err => console.error("Error connecting to the db:", err));
 

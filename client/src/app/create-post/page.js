@@ -20,7 +20,6 @@ export default function CreatePost() {
   }, [accessToken, isLoading, router]);
 
   const handleSubmit = async (e) => {
-    console.log("submit");
 
     e.preventDefault();
 

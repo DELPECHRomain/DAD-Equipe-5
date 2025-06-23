@@ -43,7 +43,7 @@ export const registerUser = async (username, email, password) => {
 
 export const fetchUserProfile = async (token, userId) => {
   try {
-    const response = await profileClient.get(`/profile-service/${userId}`, {
+    const response = await profileClient.get(`/profile-service/user/${userId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -102,7 +102,7 @@ export const createPost = async (token, userId, content, media = []) => {
 
 export const updateUserProfile = async (token, userId, data) => {
   try {
-    const response = await profileClient.put(`/profile-service/${userId}`, data, {
+    const response = await profileClient.put(`/profile-service/user/${userId}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
