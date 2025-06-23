@@ -8,7 +8,7 @@ import LogoutButton from "./LogoutButton";
 import Image from "next/image";
 
 export default function Navbar() {
-  const { accessToken } = useAuth();
+  const { accessToken, userId } = useAuth();
 
   return (
     <>
@@ -38,7 +38,7 @@ export default function Navbar() {
             </Link>
 
             <Link
-              href="/profile"
+              href={`/profile/${userId}`}
               className="flex items-center gap-4 text-xl hover:text-indigo-600 transition"
             >
               <AiOutlineUser size={28} />
@@ -87,7 +87,7 @@ export default function Navbar() {
         </Link>
 
         <Link
-          href="/profile"
+          href={`/profile/${userId}`}
           className="flex flex-col items-center justify-center hover:text-indigo-600 transition"
         >
           <AiOutlineUser size={26} />
