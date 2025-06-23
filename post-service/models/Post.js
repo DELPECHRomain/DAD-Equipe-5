@@ -18,6 +18,7 @@ const postSchema = new mongoose.Schema({
   media: [mediaSchema],
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   replies: [replySchema],
+  hashtags: [{ type: String }],
   createdAt: { type: Date, default: Date.now }
 });
 

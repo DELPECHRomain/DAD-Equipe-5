@@ -15,6 +15,9 @@ exports.createPost = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "Utilisateur introuvable." });
     }
+    
+    const hashtagRegex = /#(\w+)/g;
+    const hashtags = content.match(hashtagRegex)?.map(tag => tag.toLowerCase()) || [];
 
     // Création du post
     const post = new Post({
@@ -22,7 +25,8 @@ exports.createPost = async (req, res) => {
       content: content.trim(),
       media: Array.isArray(media) ? media : [],
       likes: [],
-      replies: []
+      replies: [],
+      hashtags 
     });
 
     await post.save();
@@ -114,7 +118,6 @@ exports.toggleLike = async (req, res) => {
 };
 
 
-
 // Récupérer les posts des utilisateurs suivis (followingIds)
 exports.getPostsByFollowing = async (req, res) => {
   try {
@@ -136,4 +139,15 @@ exports.getPostsByFollowing = async (req, res) => {
   }
 };
 
-
+exports.getPostsByHashtag = async (req, res) => {
+  try {
+    const tag = req.params.tag.toLowerCase();
+    const posts = await Post.find({ hashtags: tag })
+      .sort({ createdAt: -1 })
+      .populate("userId", "username displayName")
+      .populate("replies.userId", "username displayName");
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

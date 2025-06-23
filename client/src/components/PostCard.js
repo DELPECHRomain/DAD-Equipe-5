@@ -4,10 +4,12 @@ import { useState } from "react";
 import { toggleLike, addReply } from "@/utils/api";
 import { useAuth } from "@/context/AuthContext";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { useRouter } from "next/navigation";
 
 export default function PostCard({ post, onUpdatePost }) {
   const { accessToken, userId } = useAuth();
   const [commentContent, setCommentContent] = useState("");
+  const router = useRouter();
 
   const handleLike = async () => {
     try {
@@ -30,9 +32,26 @@ export default function PostCard({ post, onUpdatePost }) {
     }
   };
 
+  function formatHashtags(content) {
+    return content.split(/(\s+)/).map((part, i) => {
+      if (part.match(/^#\w+/)) {
+        return (
+          <span
+            key={i}
+            className="hashtag-link text-blue-600 underline cursor-pointer"
+            onClick={() => router.push(`/hashtag/${part.substring(1)}`)}
+          >
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  }
+
   return (
     <div className="border-b border-gray-200 py-4">
-      <p className="text-black">{post.content}</p>
+      <p>{formatHashtags(post.content)}</p>  
 
       {post.media?.length > 0 && (
         <div className="mt-2 flex gap-2 flex-wrap">
