@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { searchProfiles, fetchUserProfile, toggleLike, addReply, fetchFollowingPosts } from "@/utils/api";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
+import SearchBar from "@/components/searchbar";
 
 
 export default function HomeConnected() {
@@ -232,47 +233,8 @@ export default function HomeConnected() {
         )}
       </main>
 
-      <aside className="hidden lg:block w-80 p-4">
-        <div className="bg-gray-100 rounded-xl p-4">
-          <h2 className="font-bold text-lg mb-3">Recherche de comptes</h2>
-
-          <div className="flex gap-2 mb-3">
-            <input
-              type="text"
-              placeholder="Rechercher un utilisateur..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSearch();
-              }}
-            />
-            {/* <button
-              onClick={handleSearch}
-              className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
-            >
-              Rechercher
-            </button> */}
-          </div>
-
-          {searchLoading && <p>Recherche en cours...</p>}
-
-          {!searchLoading && searchResults.length === 0 && searchQuery !== "" && (
-            <p className="text-gray-600">Aucun utilisateur trouvé.</p>
-          )}
-
-          <ul>
-            {searchResults.map((profile) => (
-              <li
-                key={profile.userId}
-                className="cursor-pointer p-2 rounded hover:bg-blue-200"
-                onClick={() => goToProfile(profile.userId)}
-              >
-                {profile.displayName || profile.user?.username}
-              </li>
-            ))}
-          </ul>
-        </div>
+      <aside className="hidden lg:block">
+        <SearchBar />
       </aside>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { AiOutlineHome, AiOutlineBell, AiOutlineUser } from "react-icons/ai";
+import { AiOutlineHome, AiOutlineBell, AiOutlineUser, AiOutlineSearch  } from "react-icons/ai";
 import { FaFeatherAlt } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import LogoutButton from "./LogoutButton";
@@ -35,6 +35,15 @@ export default function Navbar() {
             >
               <AiOutlineBell size={28} />
               <span>Notifications</span>
+
+            </Link>
+
+            <Link
+              href="/search"
+              className="flex items-center gap-4 text-xl hover:text-indigo-600 transition"
+            >
+              <AiOutlineSearch size={28} />
+              <span>Search</span>
             </Link>
 
             <Link
@@ -85,6 +94,13 @@ export default function Navbar() {
         >
           <FaFeatherAlt size={20} />
         </Link>
+
+        <Link
+              href="/search"
+              className="flex items-center gap-4 text-xl hover:text-indigo-600 transition"
+            >
+              <AiOutlineSearch size={28} />
+            </Link>
 
         <Link
           href={`/profile/${userId}`}
