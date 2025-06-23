@@ -152,4 +152,13 @@ exports.followUser = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+// profile.controller.js
+exports.updateProfileImages = async (userId, updates) => {
+  return await Profile.findOneAndUpdate(
+    { userId },
+    { $set: updates },
+    { new: true }
+  );
+};
+
 

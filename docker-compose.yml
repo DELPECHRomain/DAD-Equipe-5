@@ -29,6 +29,9 @@ services:
       - ./profile-service/.env
     depends_on:
       - mongo
+    volumes:
+    - ./profile-service/uploads:/app/uploads
+
     networks:
       - my-network
 
