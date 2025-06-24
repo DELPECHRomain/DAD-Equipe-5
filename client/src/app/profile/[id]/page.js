@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -35,7 +35,11 @@ export default function Profile() {
     bio: "",
     location: "",
     website: "",
+    profileImage: "",
+    bannerImage: "",
   });
+  const avatarInputRef  = useRef(null);
+  const bannerInputRef  = useRef(null);
 
   // Gestion commentaires imbriqués
   const [commentInputs, setCommentInputs] = useState({});
@@ -43,6 +47,14 @@ export default function Profile() {
   const [openReplies, setOpenReplies] = useState({}); // toggle formulaire réponse imbriquée par clé composite
 
   const [isFollowing, setIsFollowing] = useState(false);
+
+  const fileToBase64 = (file) =>
+  new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);        // Data-URI complète : “data:image/png;base64,…”
+  });
 
   useEffect(() => {
     if (profile && profile.followers) {
@@ -71,6 +83,8 @@ export default function Profile() {
           bio: data.bio || "",
           location: data.location || "",
           website: data.website || "",
+          profileImage: data.profileImage || "",   
+          bannerImage:  data.bannerImage  || "",
         });
         return fetchUserPosts(accessToken, profileId);
       })
@@ -95,6 +109,21 @@ export default function Profile() {
       console.log(err);
     }
   };
+  const handleAvatarChange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const dataUri = await fileToBase64(file);
+  setFormData((p) => ({ ...p, profileImage: dataUri }));
+  setProfile((p) => ({ ...p, profileImage: dataUri }));
+};
+
+const handleBannerChange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const dataUri = await fileToBase64(file);
+  setFormData((p) => ({ ...p, bannerImage: dataUri }));
+  setProfile((p) => ({ ...p, bannerImage: dataUri }));
+};
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -225,42 +254,61 @@ export default function Profile() {
       <div className="min-h-screen flex items-center justify-center">Profil introuvable.</div>
     );
 
-  return (
-    <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
-      <div className="relative h-36 bg-gray-100">
-        {profile.bannerImage ? (
+return (
+  <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
+    {/* ─────────── Bannière cliquable ─────────── */}
+    <div
+      className="relative h-36 bg-gray-100 cursor-pointer"
+      onClick={() => userId === profileId && bannerInputRef.current?.click()}
+    >
+      {profile.bannerImage ? (
+        <img
+          src={profile.bannerImage}
+          alt="Bannière"
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="flex items-center justify-center h-full text-black">
+          Pas de bannière
+        </div>
+      )}
+
+      {/* Libellé « changer » visible en édition */}
+      {editMode && (
+        <span className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
+          Changer la bannière
+        </span>
+      )}
+
+      {/* ─────────── Avatar cliquable ─────────── */}
+      <div
+        className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg cursor-pointer"
+        onClick={() => userId === profileId && avatarInputRef.current?.click()}
+      >
+        {profile.profileImage ? (
           <img
-            src={profile.bannerImage}
-            alt="Bannière"
+            src={profile.profileImage}
+            alt="Photo profil"
             className="w-full h-full object-cover"
           />
         ) : (
           <div className="flex items-center justify-center h-full text-black">
-            Pas de bannière
+            No Img
           </div>
         )}
-        <div className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg">
-          {profile.profileImage ? (
-            <img
-              src={profile.profileImage}
-              alt="Photo profil"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-black">
-              No Img
-            </div>
-          )}
-        </div>
-        {!editMode && userId === profileId && (
-          <button
-            onClick={() => setEditMode(true)}
-            className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-          >
-            Modifier
-          </button>
-        )}
       </div>
+
+      {/* Bouton « Modifier » (hors mode édition) */}
+      {!editMode && userId === profileId && (
+        <button
+          onClick={() => setEditMode(true)}
+          className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+        >
+          Modifier
+        </button>
+      )}
+    </div>
+
 
       <div className="mt-16 px-6 pb-6">
         {!editMode ? (
@@ -429,6 +477,7 @@ export default function Profile() {
                 </button>
               </div>
 
+
               {/* Formulaire commentaire principal */}
               {openComments[post._id] && (
                 <form
@@ -457,6 +506,22 @@ export default function Profile() {
           );
         })}
       </div>
-    </div>
+       <input
+    type="file"
+    accept="image/*"
+    ref={avatarInputRef}
+    className="hidden"
+    onChange={handleAvatarChange}
+  />
+  <input
+    type="file"
+    accept="image/*"
+    ref={bannerInputRef}
+    className="hidden"
+    onChange={handleBannerChange}
+  />
+
+</div>  
+    
   );
 }

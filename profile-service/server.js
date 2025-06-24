@@ -5,7 +5,7 @@ const profileRoutes = require('./routes/profile.routes');
 require('dotenv').config();
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(cors({
   origin: ["http://localhost:8080", "http://nginx:8080"],
   credentials: true
