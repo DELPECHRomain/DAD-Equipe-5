@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { searchProfiles, fetchUserProfile, fetchFollowingPosts } from "@/utils/api";
+import { useLang } from "@/context/LangContext";
+import { dictionaries } from "@/utils/dictionaries";
 
 
 export default function Searchbar() {
@@ -11,6 +13,8 @@ export default function Searchbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const { lang } = useLang();
+  const dict = dictionaries[lang];
 
   const router = useRouter();
   const [posts, setPosts] = useState([]);
@@ -102,7 +106,7 @@ export default function Searchbar() {
     <div className="flex bg-white min-h-screen text-black justify-center">
       <div className=" w-full p-4">
         <div className="bg-gray-100 rounded-xl p-4">
-          <h2 className="font-bold text-lg mb-3">Recherche de comptes</h2>
+          <h2 className="font-bold text-lg mb-3">{dict.searchTitle}</h2>
 
           <div className="flex gap-2 mb-3">
             <input

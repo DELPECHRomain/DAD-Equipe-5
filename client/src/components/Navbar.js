@@ -6,9 +6,11 @@ import { FaFeatherAlt } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import LogoutButton from "./LogoutButton";
 import Image from "next/image";
+import { useLang } from "@/context/LangContext";
 
 export default function Navbar() {
   const { accessToken, userId } = useAuth();
+  const { lang, setLang } = useLang();
 
   return (
     <>
@@ -19,6 +21,10 @@ export default function Navbar() {
             <span className="text-2xl font-bold">Breezy</span>
           </Link>
 
+          <div className="mb-4 flex gap-2">
+            <button onClick={() => setLang("fr")} className={lang === "fr" ? "font-bold underline" : ""}>FR</button>
+            <button onClick={() => setLang("en")} className={lang === "en" ? "font-bold underline" : ""}>EN</button>
+          </div>
 
           <div className="space-y-6">
             <Link
