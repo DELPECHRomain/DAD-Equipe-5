@@ -43,7 +43,7 @@ export const registerUser = async (username, email, password) => {
 
 export const fetchUserProfile = async (token, userId) => {
   try {
-    const response = await profileClient.get(`/profile-service/${userId}`, {
+    const response = await profileClient.get(`/profile-service/user/${userId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     return response.data;
@@ -102,7 +102,7 @@ export const createPost = async (token, userId, content, media = []) => {
 
 export const updateUserProfile = async (token, userId, data) => {
   try {
-    const response = await profileClient.put(`/profile-service/${userId}`, data, {
+    const response = await profileClient.put(`/profile-service/user/${userId}`, data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -127,11 +127,15 @@ export const toggleLike = async (token, postId, userId) => {
   }
 };
 
-export const addReply = async (token, postId, userId, content) => {
+export const addReply = async (token, postId, userId, content, parentReplyId = null) => {
   try {
+    const body = { userId, content };
+    if (parentReplyId) {
+      body.parentReplyId = parentReplyId;
+    }
     const response = await postClient.post(
       `/post-service/posts/${postId}/replies`,
-      { userId, content },
+      body,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;
@@ -139,6 +143,7 @@ export const addReply = async (token, postId, userId, content) => {
     throw error;
   }
 };
+
 
 
 export const searchProfiles = async (token, query) => {

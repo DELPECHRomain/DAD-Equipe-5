@@ -1,11 +1,15 @@
 const mongoose = require('mongoose');
 
+// Schéma reply temporaire (vide pour la récursivité)
 const replySchema = new mongoose.Schema({
-  replyId: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true , ref: 'User'},
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-}, { _id: false });
+  createdAt: { type: Date, default: Date.now },
+  replies: [] // placeholder temporaire
+});
+
+// Ajout récursif
+replySchema.add({ replies: [replySchema] });
 
 const mediaSchema = new mongoose.Schema({
   type: { type: String, enum: ['image', 'video'], required: true },
