@@ -25,8 +25,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.hashtag-link {
-  color: #2563eb !important; 
+div .hashtag-link, p .hashtag-link, .hashtag-link {
+  color: #2563eb !important;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: underline !important;
 }

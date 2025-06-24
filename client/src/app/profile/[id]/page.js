@@ -146,6 +146,23 @@ export default function Profile() {
     setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
+  const formatHashtags = (content) => {
+  return content.split(/(\s+)/).map((part, i) => {
+    if (part.match(/^#\w+/)) {
+      return (
+        <a
+          key={i}
+          href={`/hashtag/${part.substring(1)}`}
+          className="hashtag-link text-blue-600 underline cursor-pointer"
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
   return (
     <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
       <div className="relative h-36 bg-gray-100">
@@ -228,7 +245,7 @@ export default function Profile() {
                       <p className="text-black font-semibold">
                         {post.userId.displayName || post.userId.username}
                       </p>
-                      <p className="text-black">{post.content}</p>
+                      <div>{formatHashtags(post.content)}</div>
                       {post.media && post.media.length > 0 && (
                         <div className="mt-2 flex gap-2 flex-wrap">
                           {post.media.map((mediaItem, index) => (

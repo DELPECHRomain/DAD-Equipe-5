@@ -31,27 +31,27 @@ export default function PostCard({ post, onUpdatePost }) {
       console.error("Erreur ajout commentaire :", err);
     }
   };
-
-  function formatHashtags(content) {
-    return content.split(/(\s+)/).map((part, i) => {
-      if (part.match(/^#\w+/)) {
-        return (
-          <span
-            key={i}
-            className="hashtag-link text-blue-600 underline cursor-pointer"
-            onClick={() => router.push(`/hashtag/${part.substring(1)}`)}
-          >
-            {part}
-          </span>
-        );
-      }
-      return part;
-    });
-  }
+  const formatHashtags = (content) => {
+  return content.split(" ").map((word, i) => {
+    if (word.startsWith("#")) {
+      const tag = word.slice(1);
+      return (
+        <a
+          key={i}
+          href={`/hashtag/${tag}`}
+          className="hashtag-link text-blue-600 underline cursor-pointer"
+        >
+          {word}
+        </a>
+      );
+    }
+    return word + " ";
+  });
+};
 
   return (
     <div className="border-b border-gray-200 py-4">
-      <p>{formatHashtags(post.content)}</p>  
+      <div>{formatHashtags(post.content)}</div>  
 
       {post.media?.length > 0 && (
         <div className="mt-2 flex gap-2 flex-wrap">
