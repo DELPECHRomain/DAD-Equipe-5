@@ -1,19 +1,15 @@
 const mongoose = require('mongoose');
 
+// Schéma reply temporaire (vide pour la récursivité)
 const replySchema = new mongoose.Schema({
-  replyId: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   content: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
-  replies: [{
-    replyId: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },
-    userId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    content: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
-    replies: []
-  }]
-}, { _id: false });
+  replies: [] // placeholder temporaire
+});
 
+// Ajout récursif
+replySchema.add({ replies: [replySchema] });
 
 const mediaSchema = new mongoose.Schema({
   type: { type: String, enum: ['image', 'video'], required: true },
@@ -21,10 +17,10 @@ const mediaSchema = new mongoose.Schema({
 }, { _id: false });
 
 const postSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true},
+  userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
   content: { type: String, required: true },
   media: [mediaSchema],
-  likes: [{ type: mongoose.Schema.Types.ObjectId }],
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   replies: [replySchema],
   createdAt: { type: Date, default: Date.now }
 });

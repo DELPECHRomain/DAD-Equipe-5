@@ -5,12 +5,11 @@ require('dotenv').config();
 const PROFILE_SERVICE_URL = 'http://profile-service:3001/profile-service';
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-service:3000/user-service';
 
-// Helper pour récupérer un profil utilisateur
 const getUserProfile = async (userId) => {
   try {
     const response = await axios.get(`${PROFILE_SERVICE_URL}/user/${userId}`);
     return response.data;
-  } catch (err) {
+  } catch {
     return null;
   }
 };
@@ -19,53 +18,27 @@ const getUserById = async (userId) => {
   try {
     const response = await axios.get(`${USER_SERVICE_URL}/${userId}`);
     return response.data;
-  } catch (err) {
+  } catch {
     return null;
   }
 };
 
-function addReplyToComment(replies, parentReplyId, newReply) {
-  for (let reply of replies) {
-    if (reply.replyId.toString() === parentReplyId.toString()) {
-      reply.replies.push(newReply);
-      return true; // ajouté avec succès
-    }
-    // chercher récursivement dans les sous-replies
-    if (reply.replies && reply.replies.length > 0) {
-      if (addReplyToComment(reply.replies, parentReplyId, newReply)) {
-        return true;
-      }
-    }
-  }
-  return false; // non trouvé
-}
-
-
 const getFullUserData = async (userId) => {
   const [user, profile] = await Promise.all([getUserById(userId), getUserProfile(userId)]);
   if (!user && !profile) return null;
-
   return {
     username: user?.username || null,
     displayName: profile?.displayName || null,
-    // tu peux ajouter d'autres champs fusionnés ici
   };
 };
 
-
-// Créer un post
 exports.createPost = async (req, res) => {
   try {
     const { userId, content, media } = req.body;
-
-    if (!userId || !content) {
-      return res.status(400).json({ message: "userId et content sont requis." });
-    }
+    if (!userId || !content) return res.status(400).json({ message: "userId et content sont requis." });
 
     const user = await getUserProfile(userId);
-    if (!user) {
-      return res.status(404).json({ message: "Utilisateur introuvable." });
-    }
+    if (!user) return res.status(404).json({ message: "Utilisateur introuvable." });
 
     const post = new Post({
       userId,
@@ -77,25 +50,24 @@ exports.createPost = async (req, res) => {
 
     await post.save();
     res.status(201).json(post);
-
   } catch (err) {
     console.error("Erreur création post :", err);
     res.status(500).json({ message: err.message });
   }
 };
 
-// Récupérer tous les posts
 exports.getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find().sort({ createdAt: -1 });
-
     const postsWithUserData = await Promise.all(posts.map(async (post) => {
       const user = await getUserProfile(post.userId);
-      const repliesWithUser = await Promise.all(post.replies.map(async (reply) => {
+      const repliesWithUser = await Promise.all(post.replies.map(async function enrichReply(reply) {
         const replyUser = await getUserProfile(reply.userId);
+        const nestedReplies = reply.replies ? await Promise.all(reply.replies.map(enrichReply)) : [];
         return {
           ...reply.toObject(),
-          user: replyUser ? { username: replyUser.username, displayName: replyUser.displayName } : null
+          user: replyUser ? { username: replyUser.username, displayName: replyUser.displayName } : null,
+          replies: nestedReplies
         };
       }));
 
@@ -107,24 +79,24 @@ exports.getAllPosts = async (req, res) => {
     }));
 
     res.json(postsWithUserData);
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Récupérer les posts d’un utilisateur
 exports.getPostsByUser = async (req, res) => {
   try {
     const posts = await Post.find({ userId: req.params.userId }).sort({ createdAt: -1 });
     const user = await getFullUserData(req.params.userId);
 
     const postsWithUserData = await Promise.all(posts.map(async (post) => {
-      const repliesWithUser = await Promise.all(post.replies.map(async (reply) => {
+      const repliesWithUser = await Promise.all(post.replies.map(async function enrichReply(reply) {
         const replyUser = await getFullUserData(reply.userId);
+        const nestedReplies = reply.replies ? await Promise.all(reply.replies.map(enrichReply)) : [];
         return {
           ...reply.toObject(),
-          user: replyUser || null
+          user: replyUser || null,
+          replies: nestedReplies
         };
       }));
 
@@ -136,12 +108,10 @@ exports.getPostsByUser = async (req, res) => {
     }));
 
     res.json(postsWithUserData);
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-
 
 exports.toggleLike = async (req, res) => {
   try {
@@ -158,14 +128,15 @@ exports.toggleLike = async (req, res) => {
 
     await post.save();
 
-    // Récupérer post enrichi avant de renvoyer
     const enrichedPost = await Post.findById(post._id);
 
-    const enrichedReplies = await Promise.all(enrichedPost.replies.map(async (reply) => {
+    const enrichedReplies = await Promise.all(enrichedPost.replies.map(async function enrichReply(reply) {
       const replyUser = await getFullUserData(reply.userId);
+      const nestedReplies = reply.replies ? await Promise.all(reply.replies.map(enrichReply)) : [];
       return {
         ...reply.toObject(),
-        user: replyUser || null
+        user: replyUser || null,
+        replies: nestedReplies
       };
     }));
 
@@ -181,50 +152,73 @@ exports.toggleLike = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
+const addReplyToReplies = (replies, parentReplyId, newReply) => {
+  for (const reply of replies) {
+    if (reply._id.toString() === parentReplyId) {
+      if (!reply.replies) reply.replies = [];
+      reply.replies.push(newReply);
+      return true;
+    }
+    if (reply.replies && reply.replies.length > 0) {
+      const added = addReplyToReplies(reply.replies, parentReplyId, newReply);
+      if (added) return true;
+    }
+  }
+  return false;
+};
 
 exports.addReply = async (req, res) => {
   try {
-    const { userId, content } = req.body;
+    const { userId, content, parentReplyId } = req.body;
     const post = await Post.findById(req.params.postId);
     if (!post) return res.status(404).json({ message: "Post introuvable" });
 
     const user = await getFullUserData(userId);
     if (!user) return res.status(404).json({ message: "Utilisateur introuvable" });
 
-    post.replies.push({
+    // Créer un subdocument reply
+    const newReply = post.replies.create({
       userId,
-      content
+      content,
+      replies: []
     });
+
+    if (parentReplyId) {
+      const added = addReplyToReplies(post.replies, parentReplyId, newReply);
+      if (!added) return res.status(404).json({ message: "Commentaire parent introuvable" });
+    } else {
+      post.replies.push(newReply);
+    }
 
     await post.save();
 
-    // Récupérer post enrichi avant de renvoyer
     const enrichedPost = await Post.findById(post._id);
 
-    const enrichedReplies = await Promise.all(enrichedPost.replies.map(async (reply) => {
-      const replyUser = await getFullUserData(reply.userId);
-      return {
-        ...reply.toObject(),
-        user: replyUser || null
-      };
-    }));
+    const enrichReplies = async (replies) => {
+      return Promise.all(replies.map(async function enrichReply(reply) {
+        const replyUser = await getFullUserData(reply.userId);
+        const nestedReplies = reply.replies ? await enrichReplies(reply.replies) : [];
+        return {
+          ...reply.toObject(),
+          user: replyUser ? { _id: reply.userId, username: replyUser.username, displayName: replyUser.displayName } : null,
+          replies: nestedReplies,
+        };
+      }));
+    };
 
+    const enrichedReplies = await enrichReplies(enrichedPost.replies);
     const postUser = await getFullUserData(enrichedPost.userId);
 
     res.status(201).json({
       ...enrichedPost.toObject(),
       user: postUser || null,
-      replies: enrichedReplies
+      replies: enrichedReplies,
     });
-
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-
-// Récupérer les posts des utilisateurs suivis
 exports.getPostsByFollowing = async (req, res) => {
   try {
     const { followingIds } = req.body;
@@ -238,11 +232,13 @@ exports.getPostsByFollowing = async (req, res) => {
     const postsWithUserData = await Promise.all(posts.map(async (post) => {
       const user = await getFullUserData(post.userId);
 
-      const repliesWithUser = await Promise.all(post.replies.map(async (reply) => {
+      const repliesWithUser = await Promise.all(post.replies.map(async function enrichReply(reply) {
         const replyUser = await getFullUserData(reply.userId);
+        const nestedReplies = reply.replies ? await Promise.all(reply.replies.map(enrichReply)) : [];
         return {
           ...reply.toObject(),
-          user: replyUser || null
+          user: replyUser || null,
+          replies: nestedReplies
         };
       }));
 

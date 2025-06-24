@@ -8,7 +8,6 @@ import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
 import SearchBar from "@/components/searchbar";
 
-
 export default function HomeConnected() {
   const { accessToken, isLoading, userId } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,11 +18,10 @@ export default function HomeConnected() {
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
 
-
-
-  // États pour la gestion des commentaires et des inputs
+  // clé : "postId" pour commentaire sur post, "postId-replyId" pour réponses imbriquées
   const [commentInputs, setCommentInputs] = useState({});
   const [openComments, setOpenComments] = useState({});
+  const [openReplies, setOpenReplies] = useState({}); // pour ouvrir formulaire de réponse sur un reply
 
   // Recherche automatique à chaque changement de searchQuery (avec debounce)
   useEffect(() => {
@@ -100,31 +98,97 @@ export default function HomeConnected() {
       alert("Erreur lors du like");
     }
   };
+  
 
-  // Gestion de l'ouverture du formulaire de commentaire
-  const toggleCommentInput = (postId) => {
-    setOpenComments((prev) => ({ ...prev, [postId]: !prev[postId] }));
+  // Gestion ouverture du formulaire de commentaire (post ou reply)
+  const toggleCommentInput = (key) => {
+    setOpenComments((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+  const toggleReplyInput = (key) => {
+    setOpenReplies((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Mise à jour du champ commentaire
-  const handleCommentChange = (postId, text) => {
-    setCommentInputs((prev) => ({ ...prev, [postId]: text }));
+  const handleCommentChange = (key, text) => {
+    setCommentInputs((prev) => ({ ...prev, [key]: text }));
   };
 
-  // Soumission d'un commentaire
-  const handleCommentSubmit = async (postId, e) => {
-    e.preventDefault();
-    const text = commentInputs[postId];
-    if (!text || text.trim() === "") return;
+  // Soumission commentaire ou réponse imbriquée
+  // Si parentReplyId est null, commentaire sur post ; sinon réponse à reply
+  const handleCommentSubmit = async (postId, parentReplyId, e) => {
+  e.preventDefault();
+  const key = parentReplyId ? `${postId}-${parentReplyId}` : postId;
+  const text = commentInputs[key];
+  console.log("Soumission commentaire", { postId, parentReplyId, text });
+  if (!text || text.trim() === "") return;
 
-    try {
-      const updatedPost = await addReply(accessToken, postId, userId, text.trim());
-      setPosts((prev) => prev.map((p) => (p._id === postId ? updatedPost : p)));
-      setCommentInputs((prev) => ({ ...prev, [postId]: "" }));
-    } catch {
-      alert("Erreur lors de l'ajout du commentaire");
+  try {
+    const updatedPost = await addReply(accessToken, postId, userId, text.trim(), parentReplyId);
+    setPosts((prev) => prev.map((p) => (p._id === postId ? updatedPost : p)));
+    setCommentInputs((prev) => ({ ...prev, [key]: "" }));
+
+    if (parentReplyId) {
+      setOpenReplies((prev) => ({ ...prev, [key]: false }));
     }
+  } catch {
+    alert("Erreur lors de l'ajout du commentaire");
+  }
+};
+
+
+  // Fonction récursive pour afficher les replies imbriqués
+  const renderReplies = (postId, replies) => {
+    if (!replies || replies.length === 0) return null;
+
+    return replies.map((reply) => {
+      const key = `${postId}-${reply._id}`;
+      console.log(reply);
+      return (
+        <div key={reply._id} className="ml-6 mb-3 border-l border-gray-300 pl-3">
+          <div>
+            <span className="font-semibold text-black cursor-pointer" onClick={() => goToProfile(reply?.userId)}>
+              @{reply.user?.username}
+            </span>{" "}
+            <span className="text-gray-700">{reply.content}</span>
+            <div className="text-gray-400 text-xs">
+              {new Date(reply.createdAt).toLocaleString()}
+            </div>
+          </div>
+
+          <button
+            onClick={() => toggleReplyInput(key)}
+            className="text-sm text-blue-500 hover:underline mt-1"
+          >
+            {openReplies[key] ? "Annuler" : "Répondre"}
+          </button>
+
+          {openReplies[key] && (
+            <form
+              onSubmit={(e) => handleCommentSubmit(postId, reply._id, e)}
+              className="mt-1 flex gap-2"
+            >
+              <input
+                type="text"
+                placeholder="Répondre…"
+                value={commentInputs[key] || ""}
+                onChange={(e) => handleCommentChange(key, e.target.value)}
+                className="flex-1 border border-gray-300 rounded-full px-3 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
+              >
+                Envoyer
+              </button>
+            </form>
+          )}
+
+          {reply.replies && reply.replies.length > 0 && renderReplies(postId, reply.replies)}
+        </div>
+      );
+    });
   };
+
+
 
   if (isLoading || loadingPosts) {
     return (
@@ -157,7 +221,9 @@ export default function HomeConnected() {
             return (
               <div key={post._id} className="p-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-black">@{post.user?.username}</span>
+                  <span className="font-semibold text-black cursor-pointer" onClick={() => goToProfile(post.userId)}>
+                    @{post.user?.username}
+                  </span>
                   <span className="text-gray-500 text-sm">
                     {new Date(post.createdAt).toLocaleString()}
                   </span>
@@ -191,24 +257,14 @@ export default function HomeConnected() {
                   <>
                     <div className="mt-3 max-h-40 overflow-y-auto border-t border-gray-100 pt-2">
                       {post.replies && post.replies.length > 0 ? (
-                        post.replies.map((comment) => (
-                          <div key={comment._id || comment.createdAt} className="mb-2">
-                            <span className="font-semibold text-black">
-                              @{comment.user?.username}
-                            </span>{" "}
-                            <span className="text-gray-700">{comment.content}</span>
-                            <div className="text-gray-400 text-xs">
-                              {new Date(comment.createdAt).toLocaleString()}
-                            </div>
-                          </div>
-                        ))
+                        renderReplies(post._id, post.replies)
                       ) : (
                         <p className="text-gray-400 text-sm">Pas encore de commentaires</p>
                       )}
                     </div>
 
                     <form
-                      onSubmit={(e) => handleCommentSubmit(post._id, e)}
+                      onSubmit={(e) => handleCommentSubmit(post._id, null, e)}
                       className="mt-2 flex gap-2"
                     >
                       <input

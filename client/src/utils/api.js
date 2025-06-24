@@ -127,11 +127,15 @@ export const toggleLike = async (token, postId, userId) => {
   }
 };
 
-export const addReply = async (token, postId, userId, content) => {
+export const addReply = async (token, postId, userId, content, parentReplyId = null) => {
   try {
+    const body = { userId, content };
+    if (parentReplyId) {
+      body.parentReplyId = parentReplyId;
+    }
     const response = await postClient.post(
       `/post-service/posts/${postId}/replies`,
-      { userId, content },
+      body,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data;
@@ -139,6 +143,7 @@ export const addReply = async (token, postId, userId, content) => {
     throw error;
   }
 };
+
 
 
 export const searchProfiles = async (token, query) => {
