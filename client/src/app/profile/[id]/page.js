@@ -212,6 +212,29 @@ export default function Profile() {
     });
   };
 
+  function formatHashtags(content) {
+  return content.split(/(\s+)/).map((part, i) => {
+    // Détecte #mot, #mot. #mot! etc.
+    const match = part.match(/^(#\w+)(\W*)$/);
+    if (match) {
+      const tag = match[1].substring(1);
+      const after = match[2];
+      return (
+        <span key={i}>
+          <a
+            href={`/hashtag/${tag}`}
+            className="text-blue-600 underline cursor-pointer"
+          >
+            {match[1]}
+          </a>
+          {after}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
   if (loading)
     return (
       <div className="min-h-screen flex items-center justify-center">Chargement...</div>
@@ -404,7 +427,7 @@ export default function Profile() {
                 </div>
               </div>
 
-              <p className="text-black mb-2">{post.content}</p>
+              <div className="mb-2">{formatHashtags(post.content)}</div>
 
               <div className="flex items-center gap-4 mb-2">
                 <button

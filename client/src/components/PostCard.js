@@ -30,9 +30,32 @@ export default function PostCard({ post, onUpdatePost }) {
     }
   };
 
+  function formatHashtags(content) {
+  return content.split(/(\s+)/).map((part, i) => {
+    // Détecte #mot, #mot. #mot! etc.
+    const match = part.match(/^(#\w+)(\W*)$/);
+    if (match) {
+      const tag = match[1].substring(1);
+      const after = match[2];
+      return (
+        <span key={i}>
+          <a
+            href={`/hashtag/${tag}`}
+            className="text-blue-600 underline cursor-pointer"
+          >
+            {match[1]}
+          </a>
+          {after}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
   return (
     <div className="border-b border-gray-200 py-4">
-      <p className="text-black">{post.content}</p>
+      <div>{formatHashtags(post.content)}</div>
 
       {post.media?.length > 0 && (
         <div className="mt-2 flex gap-2 flex-wrap">
