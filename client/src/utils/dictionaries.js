@@ -66,6 +66,9 @@ export const dictionaries = {
     noPostToDisplay: "Aucun post à afficher pour le moment.",
     noCommentsYet: "Pas encore de commentaires",
     editProfile: "Modifier le profil",
+    noNotifications: "Aucune notification.",
+    likedYourPost: "a aimé votre post.",
+    followedYou: "a commencé à vous suivre.",
   },
   en: {
     loading: "Loading...",
@@ -134,5 +137,8 @@ export const dictionaries = {
     noPostToDisplay: "No posts to display at the moment.",
     noCommentsYet: "No comments yet",
     editProfile: "Edit Profile",
+    noNotifications: "No notifications.",
+    likedYourPost: "liked your post.",
+    followedYou: "started following you.",
   }
 };
