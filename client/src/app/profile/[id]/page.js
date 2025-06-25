@@ -18,6 +18,8 @@ import {
   AiFillHeart,
 } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
+import ThemeSwitch from "@/components/ThemeSwitch";
+
 
 export default function Profile() {
   const { accessToken, username, userId } = useAuth();
@@ -256,6 +258,9 @@ const handleBannerChange = async (e) => {
 
 return (
   <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
+   {editMode && (
+    <ThemeSwitch className="absolute top-4 right-4" />
+   )}
     {/* ─────────── Bannière cliquable ─────────── */}
     <div
       className="relative h-36 bg-gray-100 cursor-pointer"
@@ -296,16 +301,19 @@ return (
         )}
       </div>
 
-      {/* Bouton « Modifier » (hors mode édition) */}
+  
+    </div>
+
       {!editMode && userId === profileId && (
+        <div className="mt-4 px-6 flex justify-end">
         <button
           onClick={() => setEditMode(true)}
-          className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
           Modifier
         </button>
+        </div>
       )}
-    </div>
 
 
       <div className="mt-16 px-6 pb-6">

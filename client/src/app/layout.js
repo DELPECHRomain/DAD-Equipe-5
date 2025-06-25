@@ -13,7 +13,6 @@ export default function RootLayout({ children }) {
                 <ClientOnly>
                     <AuthProvider>
                         <Navbar />
-                        <ThemeSwitch />
                         {children}
                     </AuthProvider>
                 </ClientOnly>
