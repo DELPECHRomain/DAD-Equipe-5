@@ -66,3 +66,9 @@ L’architecture repose sur des **microservices conteneurisés avec Docker**, av
 git clone https://github.com/DELPECHRomain/DAD-Equipe-5.git
 cd DAD-Equipe-5
 docker-compose up --build
+
+## 🌙 Activer le Dark Mode
+
+1. Allez sur votre **page Profil**  
+2. Cliquez sur **Modifier**  
+3. Cliquez sur l’icône 🌓 pour basculer en **Dark Mode**  
