@@ -265,7 +265,7 @@ return (
         <img
           src={profile.bannerImage}
           alt="Bannière"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover banner-img"
         />
       ) : (
         <div className="flex items-center justify-center h-full text-black">
@@ -273,14 +273,12 @@ return (
         </div>
       )}
 
-      {/* Libellé « changer » visible en édition */}
       {editMode && (
         <span className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
           Changer la bannière
         </span>
       )}
 
-      {/* ─────────── Avatar cliquable ─────────── */}
       <div
         className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg cursor-pointer"
         onClick={() => userId === profileId && avatarInputRef.current?.click()}
@@ -289,7 +287,7 @@ return (
           <img
             src={profile.profileImage}
             alt="Photo profil"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover avatar-img"
           />
         ) : (
           <div className="flex items-center justify-center h-full text-black">

@@ -3,6 +3,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import ClientOnly from "@/components/ClientOnly";
+import ThemeSwitch from "@/components/ThemeSwitch";
 
 
 export default function RootLayout({ children }) {
@@ -12,6 +13,7 @@ export default function RootLayout({ children }) {
                 <ClientOnly>
                     <AuthProvider>
                         <Navbar />
+                        <ThemeSwitch />
                         {children}
                     </AuthProvider>
                 </ClientOnly>

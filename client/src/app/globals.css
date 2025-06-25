@@ -5,6 +5,14 @@
   --foreground: #e7ecf0;
 }
 
+
+html.dark {
+filter: invert(1) hue-rotate(180deg);
+}
+html.dark .avatar-img,
+html.dark .banner-img {
+  filter: invert(1) hue-rotate(180deg);
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
