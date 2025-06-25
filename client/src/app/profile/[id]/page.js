@@ -286,7 +286,12 @@ return (
 
       <div
         className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg cursor-pointer"
-        onClick={() => userId === profileId && avatarInputRef.current?.click()}
+        onClick={(e) => {
+          e.stopPropagation(); 
+          if (editMode && userId === profileId){  avatarInputRef.current?.click();
+
+          }
+        }}
       >
         {profile.profileImage ? (
           <img
