@@ -6,9 +6,9 @@ cd server : npm  run dev
 
 cd client : npm run start
 (PORT 8080)
-# 🐦 DAD-Equipe-5 – Application de Microblogging en Microservices
+# 🐦 DAD-Equipe-5 – Réseau Social en Microservices
 
-Ce projet est une plateforme de **microblogging** inspirée de Twitter/X, développée dans le cadre d’un projet académique.  
+Ce projet est un réseau social inspirée de Twitter/X, développée dans le cadre d’un projet académique.  
 L’architecture repose sur des **microservices conteneurisés avec Docker**, avec une **application front-end React/Next.js** et des **API back-end Node.js/Express** connectées à une base MongoDB.
 
 ---
@@ -66,3 +66,11 @@ L’architecture repose sur des **microservices conteneurisés avec Docker**, av
 git clone https://github.com/DELPECHRomain/DAD-Equipe-5.git
 cd DAD-Equipe-5
 docker-compose up --build
+```
+
+## 🌙 Activer le Dark Mode
+
+1. Allez sur votre **page Profil**  
+2. Cliquez sur **Modifier**  
+3. Cliquez sur l’icône 🌓 pour basculer en **Dark Mode**  
+
