@@ -89,7 +89,7 @@ export default function Searchbar() {
   if (isLoading || loadingPosts) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Chargement...</p>
+        <p className="text-gray-600">{dict.loading}</p>
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function Searchbar() {
   if (!accessToken) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Redirecting to login...</p>
+        <p className="text-gray-600">{dict.redirecting}</p>
       </div>
     );
   }
@@ -111,7 +111,7 @@ export default function Searchbar() {
           <div className="flex gap-2 mb-3">
             <input
               type="text"
-              placeholder="Rechercher un utilisateur..."
+              placeholder={dict.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 border border-gray-300 rounded-full px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -130,7 +130,7 @@ export default function Searchbar() {
           {searchLoading && <p>Recherche en cours...</p>}
 
           {!searchLoading && searchResults.length === 0 && searchQuery !== "" && (
-            <p className="text-gray-600">Aucun utilisateur trouvé.</p>
+            <p className="text-gray-600">{dict.noUser}</p>
           )}
 
           <ul>

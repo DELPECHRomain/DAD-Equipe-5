@@ -18,6 +18,8 @@ import {
   AiFillHeart,
 } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
+import { useLang } from "@/context/LangContext";
+import { dictionaries } from "@/utils/dictionaries";
 
 export default function Profile() {
   const { accessToken, username, userId } = useAuth();
@@ -43,6 +45,9 @@ export default function Profile() {
   const [openReplies, setOpenReplies] = useState({}); // toggle formulaire réponse imbriquée par clé composite
 
   const [isFollowing, setIsFollowing] = useState(false);
+
+  const { lang } = useLang();
+  const dict = dictionaries[lang];
 
   useEffect(() => {
     if (profile && profile.followers) {
@@ -237,7 +242,7 @@ export default function Profile() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center">{dict.loading}</div>
     );
   if (error)
     return (
@@ -245,7 +250,7 @@ export default function Profile() {
     );
   if (!profile)
     return (
-      <div className="min-h-screen flex items-center justify-center">Profil introuvable.</div>
+      <div className="min-h-screen flex items-center justify-center">{dict.notFound}</div>
     );
 
   return (
@@ -259,7 +264,7 @@ export default function Profile() {
           />
         ) : (
           <div className="flex items-center justify-center h-full text-black">
-            Pas de bannière
+            {dict.noBannerImage}
           </div>
         )}
         <div className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg">
@@ -271,7 +276,7 @@ export default function Profile() {
             />
           ) : (
             <div className="flex items-center justify-center h-full text-black">
-              No Img
+              {dict.noProfileImage}
             </div>
           )}
         </div>
@@ -280,7 +285,7 @@ export default function Profile() {
             onClick={() => setEditMode(true)}
             className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
           >
-            Modifier
+            {dict.editProfile}
           </button>
         )}
       </div>
@@ -312,8 +317,8 @@ export default function Profile() {
             </div>
 
             <div className="flex gap-8 mt-6 text-black font-semibold text-sm border-t border-gray-200 pt-4">
-              <div><span>{profile.followers?.length || 0}</span> abonnés</div>
-              <div><span>{profile.following?.length || 0}</span> abonnements</div>
+              <div><span>{profile.followers?.length || 0}</span> {dict.followers}</div>
+              <div><span>{profile.following?.length || 0}</span> {dict.following}</div>
             </div>
             {userId !== profileId && (
               <button
@@ -329,7 +334,7 @@ export default function Profile() {
           <form onSubmit={handleSubmit} className="space-y-4 text-black">
             <div>
               <label htmlFor="displayName" className="block font-semibold mb-1">
-                Nom d’affichage
+                {dict.displayName}
               </label>
               <input
                 type="text"
@@ -343,7 +348,7 @@ export default function Profile() {
             </div>
             <div>
               <label htmlFor="bio" className="block font-semibold mb-1">
-                Bio
+                {dict.bio}
               </label>
               <textarea
                 id="bio"
@@ -356,7 +361,7 @@ export default function Profile() {
             </div>
             <div>
               <label htmlFor="location" className="block font-semibold mb-1">
-                Localisation
+                {dict.location}
               </label>
               <input
                 type="text"
@@ -369,7 +374,7 @@ export default function Profile() {
             </div>
             <div>
               <label htmlFor="website" className="block font-semibold mb-1">
-                Site web
+                {dict.website}
               </label>
               <input
                 type="url"
@@ -386,14 +391,14 @@ export default function Profile() {
                 type="submit"
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
               >
-                Enregistrer
+                {dict.saveChanges}
               </button>
               <button
                 type="button"
                 onClick={() => setEditMode(false)}
                 className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition"
               >
-                Annuler
+                {dict.cancel}
               </button>
             </div>
           </form>
@@ -403,7 +408,7 @@ export default function Profile() {
       {/* Posts */}
       <div className="border-t border-gray-200 p-6 space-y-8">
         {posts.length === 0 && (
-          <p className="text-center text-gray-500">Aucun post à afficher.</p>
+          <p className="text-center text-gray-500">{dict.noPostToDisplay}</p>
         )}
 
         {posts.map((post) => {
@@ -469,7 +474,7 @@ export default function Profile() {
                     type="submit"
                     className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
                   >
-                    Envoyer
+                    {dict.send}
                   </button>
                 </form>
               )}
