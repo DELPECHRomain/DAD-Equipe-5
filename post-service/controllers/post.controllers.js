@@ -45,7 +45,8 @@ exports.createPost = async (req, res) => {
       content: content.trim(),
       media: Array.isArray(media) ? media : [],
       likes: [],
-      replies: []
+      replies: [],
+      hashtags: content.match(/#\w+/g) || [],
     });
 
     await post.save();

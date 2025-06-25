@@ -84,7 +84,7 @@ export default function LoginClient() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            placeholder="{dict.email}"
+            placeholder={dict.email}
             className="bg-white border-indigo-800 text-black w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
@@ -92,7 +92,7 @@ export default function LoginClient() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            placeholder="{dict.password}"
+            placeholder={dict.password}
             className="bg-white border-indigo-800 text-black w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
@@ -100,7 +100,7 @@ export default function LoginClient() {
             type="submit"
             className="w-full py-3 rounded-full text-white font-semibold 
                  bg-indigo-800 cursor-pointer hover:bg-indigo-700">
-            {dict.loginBtn}
+            {dict.connect}
           </button>
 
           {error && (
@@ -121,7 +121,7 @@ export default function LoginClient() {
           className="w-full max-w-sm"
         >
           <button className="w-full py-3 px-4 rounded-full bg-white border text-indigo-800 border-indigo-800 font-semibold hover:bg-indigo-50 transition cursor-pointer">
-            {dict.registerBtn}
+            {dict.register}
           </button>
         </Link>
       </div>

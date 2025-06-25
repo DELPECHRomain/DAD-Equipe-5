@@ -187,7 +187,7 @@ export default function Profile() {
             onClick={() => toggleReplyInput(key)}
             className="text-sm text-blue-500 hover:underline mt-1"
           >
-            {openReplies[key] ? "Annuler" : "Répondre"}
+            {openReplies[key] ? dict.cancel : dict.reply}
           </button>
 
           {openReplies[key] && (
@@ -197,7 +197,7 @@ export default function Profile() {
             >
               <input
                 type="text"
-                placeholder="Répondre…"
+                placeholder={dict.reply}
                 value={commentInputs[key] || ""}
                 onChange={(e) => handleCommentChange(key, e.target.value)}
                 className="flex-1 border border-gray-300 rounded-full px-3 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -219,7 +219,6 @@ export default function Profile() {
 
   function formatHashtags(content) {
   return content.split(/(\s+)/).map((part, i) => {
-    // Détecte #mot, #mot. #mot! etc.
     const match = part.match(/^(#\w+)(\W*)$/);
     if (match) {
       const tag = match[1].substring(1);
@@ -258,13 +257,13 @@ export default function Profile() {
       <div className="relative h-36 bg-gray-100">
         {profile.bannerImage ? (
           <img
-            src={profile.bannerImage}
+            src={profile.noImg}
             alt="Bannière"
             className="w-full h-full object-cover"
           />
         ) : (
           <div className="flex items-center justify-center h-full text-black">
-            {dict.noBannerImage}
+            {dict.bannerMissing}
           </div>
         )}
         <div className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg">
@@ -391,7 +390,7 @@ export default function Profile() {
                 type="submit"
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
               >
-                {dict.saveChanges}
+                {dict.save}
               </button>
               <button
                 type="button"
@@ -432,7 +431,7 @@ export default function Profile() {
                 </div>
               </div>
 
-              <div className="mb-2">{formatHashtags(post.content)}</div>
+              <div className="mb-2 text-black">{formatHashtags(post.content)}</div>
 
               <div className="flex items-center gap-4 mb-2">
                 <button

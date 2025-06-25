@@ -36,7 +36,6 @@ export default function PostCard({ post, onUpdatePost }) {
 
   function formatHashtags(content) {
   return content.split(/(\s+)/).map((part, i) => {
-    // Détecte #mot, #mot. #mot! etc.
     const match = part.match(/^(#\w+)(\W*)$/);
     if (match) {
       const tag = match[1].substring(1);
@@ -59,7 +58,7 @@ export default function PostCard({ post, onUpdatePost }) {
 
   return (
     <div className="border-b border-gray-200 py-4">
-      <div>{formatHashtags(post.content)}</div>
+      <p className="text-black">{formatHashtags(post.content)}</p>
 
       {post.media?.length > 0 && (
         <div className="mt-2 flex gap-2 flex-wrap">

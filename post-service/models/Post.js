@@ -22,7 +22,8 @@ const postSchema = new mongoose.Schema({
   media: [mediaSchema],
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   replies: [replySchema],
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  hashtags: [{ type: String }],
 });
 
 module.exports = mongoose.model('Post', postSchema);

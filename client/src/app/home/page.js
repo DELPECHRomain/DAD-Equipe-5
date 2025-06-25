@@ -163,7 +163,7 @@ export default function HomeConnected() {
             onClick={() => toggleReplyInput(key)}
             className="text-sm text-blue-500 hover:underline mt-1"
           >
-            {openReplies[key] ? "Annuler" : "Répondre"}
+            {openReplies[key] ? dict.cancel : dict.reply}
           </button>
 
           {openReplies[key] && (
@@ -173,7 +173,7 @@ export default function HomeConnected() {
             >
               <input
                 type="text"
-                placeholder="Répondre…"
+                placeholder={dict.reply}
                 value={commentInputs[key] || ""}
                 onChange={(e) => handleCommentChange(key, e.target.value)}
                 className="flex-1 border border-gray-300 rounded-full px-3 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -210,6 +210,27 @@ export default function HomeConnected() {
       </div>
     );
   }
+    function formatHashtags(content) {
+  return content.split(/(\s+)/).map((part, i) => {
+    const match = part.match(/^(#\w+)(\W*)$/);
+    if (match) {
+      const tag = match[1].substring(1);
+      const after = match[2];
+      return (
+        <span key={i}>
+          <a
+            href={`/hashtag/${tag}`}
+            className="text-blue-600 underline cursor-pointer"
+          >
+            {match[1]}
+          </a>
+          {after}
+        </span>
+      );
+    }
+    return part;
+  });
+}
 
   return (
     <div className="flex bg-white min-h-screen text-black">
@@ -233,7 +254,7 @@ export default function HomeConnected() {
                     {new Date(post.createdAt).toLocaleString()}
                   </span>
                 </div>
-                <p className="mt-2 text-gray-800">{post.content}</p>
+                <div className="mb-2 text-black">{formatHashtags(post.content)}</div>
 
                 <div className="flex items-center justify-between mt-3 text-gray-500 text-sm">
                   <button
@@ -274,7 +295,7 @@ export default function HomeConnected() {
                     >
                       <input
                         type="text"
-                        placeholder="Répondre…"
+                        placeholder={dict.reply}
                         value={commentInputs[post._id] || ""}
                         onChange={(e) => handleCommentChange(post._id, e.target.value)}
                         className="flex-1 border border-gray-300 rounded-full px-4 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -65,7 +65,7 @@ export default function CreatePost() {
         <textarea
           className="text-black w-full border border-gray-300 rounded-md p-3 resize-none focus:ring-2 focus:ring-indigo-500"
           rows={5}
-          placeholder="Quoi de neuf ?"
+          placeholder={dict.whatsUp}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           maxLength={280}
@@ -85,7 +85,7 @@ export default function CreatePost() {
             content.trim() ? "bg-indigo-600 hover:bg-indigo-700" : "bg-gray-300"
           } text-white font-semibold py-2 px-6 rounded-full`}
         >
-          {loading ? "Publication..." : "Publier"}
+          {loading ? dict.posting : dict.postBtn}
         </button>
       </form>
     </div>

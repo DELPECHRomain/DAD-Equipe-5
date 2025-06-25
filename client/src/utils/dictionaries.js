@@ -65,6 +65,7 @@ export const dictionaries = {
     connectBtn: "Se connecter",
     noPostToDisplay: "Aucun post à afficher pour le moment.",
     noCommentsYet: "Pas encore de commentaires",
+    editProfile: "Modifier le profil",
   },
   en: {
     loading: "Loading...",
@@ -132,5 +133,6 @@ export const dictionaries = {
     connectBtn: "Sign in",
     noPostToDisplay: "No posts to display at the moment.",
     noCommentsYet: "No comments yet",
+    editProfile: "Edit Profile",
   }
 };

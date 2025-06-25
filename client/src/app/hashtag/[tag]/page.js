@@ -27,7 +27,10 @@ export default function HashtagPage() {
         setPosts(data);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        console.error("Erreur lors du fetch hashtag :", err);
+        setLoading(false);
+      });
   }, [tag, accessToken]);
 
   if (loading) {
@@ -48,5 +51,4 @@ export default function HashtagPage() {
       )}
     </div>
   );
-  
 }

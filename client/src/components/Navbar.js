@@ -24,8 +24,24 @@ export default function Navbar() {
           </Link>
 
           <div className="mb-4 flex gap-2">
-            <button onClick={() => setLang("fr")} className={lang === "fr" ? "font-bold underline" : ""}>FR</button>
-            <button onClick={() => setLang("en")} className={lang === "en" ? "font-bold underline" : ""}>EN</button>
+            <button onClick={() => setLang("fr")}>
+              <Image
+                src="/flags/french flag.png"
+                alt="Français"
+                width={28}
+                height={20}
+                className={lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}
+              />
+            </button>
+            <button onClick={() => setLang("en")}>
+              <Image
+                src="/flags/english flag.png"
+                alt="English"
+                width={28}
+                height={20}
+                className={lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}
+              />
+            </button>
           </div>
 
           <div className="space-y-6">
