@@ -264,7 +264,7 @@ return (
     {/* ─────────── Bannière cliquable ─────────── */}
     <div
       className="relative h-36 bg-gray-100 cursor-pointer"
-      onClick={() => userId === profileId && bannerInputRef.current?.click()}
+      onClick={() => editMode &&userId === profileId && bannerInputRef.current?.click()}
     >
       {profile.bannerImage ? (
         <img
@@ -286,12 +286,14 @@ return (
 
       <div
         className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg cursor-pointer"
+
         onClick={(e) => {
           e.stopPropagation(); 
           if (editMode && userId === profileId){  avatarInputRef.current?.click();
 
           }
         }}
+
       >
         {profile.profileImage ? (
           <img
