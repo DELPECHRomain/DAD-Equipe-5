@@ -18,6 +18,8 @@ import {
   AiFillHeart,
 } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
+import ThemeSwitch from "@/components/ThemeSwitch";
+
 
 export default function Profile() {
   const { accessToken, username, userId } = useAuth();
@@ -256,6 +258,9 @@ const handleBannerChange = async (e) => {
 
 return (
   <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
+   {editMode && (
+    <ThemeSwitch className="absolute top-4 right-4" />
+   )}
     {/* ─────────── Bannière cliquable ─────────── */}
     <div
       className="relative h-36 bg-gray-100 cursor-pointer"
@@ -265,7 +270,7 @@ return (
         <img
           src={profile.bannerImage}
           alt="Bannière"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover banner-img"
         />
       ) : (
         <div className="flex items-center justify-center h-full text-black">
@@ -273,24 +278,28 @@ return (
         </div>
       )}
 
-      {/* Libellé « changer » visible en édition */}
       {editMode && (
         <span className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
           Changer la bannière
         </span>
       )}
 
-      {/* ─────────── Avatar cliquable ─────────── */}
       <div
         className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg cursor-pointer"
-        onClick={() => editMode && userId === profileId && avatarInputRef.current?.click()}
+
+        onClick={(e) => {
+          e.stopPropagation(); 
+          if (editMode && userId === profileId){  avatarInputRef.current?.click();
+
+          }
+        }}
 
       >
         {profile.profileImage ? (
           <img
             src={profile.profileImage}
             alt="Photo profil"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover avatar-img"
           />
         ) : (
           <div className="flex items-center justify-center h-full text-black">
@@ -299,16 +308,19 @@ return (
         )}
       </div>
 
-      {/* Bouton « Modifier » (hors mode édition) */}
+  
+    </div>
+
       {!editMode && userId === profileId && (
+        <div className="mt-4 px-6 flex justify-end">
         <button
           onClick={() => setEditMode(true)}
-          className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
           Modifier
         </button>
+        </div>
       )}
-    </div>
 
 
       <div className="mt-16 px-6 pb-6">
