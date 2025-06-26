@@ -10,6 +10,9 @@ html.dark {
 filter: invert(1) hue-rotate(180deg);
 }
 html.dark .avatar-img,
+html.dark .french-img,
+html.dark .english-img,
+html.dark .french1-img,
 html.dark .banner-img {
   filter: invert(1) hue-rotate(180deg);
 }
