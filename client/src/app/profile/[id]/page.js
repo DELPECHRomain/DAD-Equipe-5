@@ -20,6 +20,7 @@ import {
 import { FaRegCommentDots } from "react-icons/fa";
 
 import { useLang } from "@/context/LangContext";
+import Image from "next/image";
 import { dictionaries } from "@/utils/dictionaries";
 
 import ThemeSwitch from "@/components/ThemeSwitch";
@@ -56,7 +57,7 @@ export default function Profile() {
   const [isFollowing, setIsFollowing] = useState(false);
 
 
-  const { lang } = useLang();
+  const { lang, setLang } = useLang();
   const dict = dictionaries[lang];
 
   const fileToBase64 = (file) =>
@@ -291,8 +292,30 @@ const handleBannerChange = async (e) => {
 return (
   <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
    {editMode && (
-    <ThemeSwitch className="absolute top-4 right-4" />
-   )}
+      <>
+        <ThemeSwitch className="absolute top-4 right-4" />
+        <div className="mb-4 flex gap-2 justify-end">
+          <button onClick={() => setLang("fr")} aria-label="Français">
+            <Image
+              src="/flags/french flag.png"
+              alt="Français"
+              width={28}
+              height={20}
+              className={lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}
+            />
+          </button>
+          <button onClick={() => setLang("en")} aria-label="English">
+            <Image
+              src="/flags/english flag.png"
+              alt="English"
+              width={28}
+              height={20}
+              className={lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}
+            />
+          </button>
+        </div>
+      </>
+    )}
     <div
       className="relative h-36 bg-gray-100 cursor-pointer"
       onClick={() => editMode &&userId === profileId && bannerInputRef.current?.click()}
