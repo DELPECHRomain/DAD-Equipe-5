@@ -10,6 +10,7 @@ import { useLang } from "@/context/LangContext";
 import { dictionaries } from "@/utils/dictionaries";
 
 
+
 export default function RegisterPage() {
     const { accessToken, register } = useAuth();
     const router = useRouter();
@@ -21,7 +22,7 @@ export default function RegisterPage() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(true);
 
-    const { lang } = useLang();
+    const { lang, setLang } = useLang();
     const dict = dictionaries[lang];
 
     useEffect(() => {
@@ -123,6 +124,26 @@ export default function RegisterPage() {
                         {dict.connect}
                     </button>
                 </Link>
+                <div className="mb-4 flex gap-2 justify-center">
+                          <button onClick={() => setLang("fr")} aria-label="Français">
+                            <Image
+                              src="/flags/french flag.png" 
+                              alt="Français"
+                              width={28}
+                              height={20}
+                              className={lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}
+                            />
+                          </button>
+                          <button onClick={() => setLang("en")} aria-label="English">
+                            <Image
+                              src="/flags/english flag.png" 
+                              alt="English"
+                              width={28}
+                              height={20}
+                              className={lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}
+                            />
+                          </button>
+                        </div>
             </div>
         </div>
     );

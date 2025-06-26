@@ -20,15 +20,15 @@ export default function HomeConnected() {
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
 
-  // clé : "postId" pour commentaire sur post, "postId-replyId" pour réponses imbriquées
+  
   const [commentInputs, setCommentInputs] = useState({});
   const [openComments, setOpenComments] = useState({});
-  const [openReplies, setOpenReplies] = useState({}); // pour ouvrir formulaire de réponse sur un reply
+  const [openReplies, setOpenReplies] = useState({}); 
 
   const { lang } = useLang();
   const dict = dictionaries[lang];
 
-  // Recherche automatique à chaque changement de searchQuery (avec debounce)
+  
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setSearchResults([]);
@@ -37,7 +37,7 @@ export default function HomeConnected() {
 
     const delayDebounceFn = setTimeout(() => {
       handleSearch();
-    }, 300); // 300ms debounce
+    }, 300); 
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
@@ -105,7 +105,7 @@ export default function HomeConnected() {
   };
   
 
-  // Gestion ouverture du formulaire de commentaire (post ou reply)
+  // Gestion ouverture du formulaire de commentaire
   const toggleCommentInput = (key) => {
     setOpenComments((prev) => ({ ...prev, [key]: !prev[key] }));
   };

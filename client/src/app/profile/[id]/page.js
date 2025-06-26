@@ -20,6 +20,7 @@ import {
 import { FaRegCommentDots } from "react-icons/fa";
 
 import { useLang } from "@/context/LangContext";
+import Image from "next/image";
 import { dictionaries } from "@/utils/dictionaries";
 
 import ThemeSwitch from "@/components/ThemeSwitch";
@@ -48,15 +49,15 @@ export default function Profile() {
   const avatarInputRef  = useRef(null);
   const bannerInputRef  = useRef(null);
 
-  // Gestion commentaires imbriqués
+  
   const [commentInputs, setCommentInputs] = useState({});
-  const [openComments, setOpenComments] = useState({}); // toggle formulaire commentaire principal par postId
-  const [openReplies, setOpenReplies] = useState({}); // toggle formulaire réponse imbriquée par clé composite
+  const [openComments, setOpenComments] = useState({}); 
+  const [openReplies, setOpenReplies] = useState({}); 
 
   const [isFollowing, setIsFollowing] = useState(false);
 
 
-  const { lang } = useLang();
+  const { lang, setLang } = useLang();
   const dict = dictionaries[lang];
 
   const fileToBase64 = (file) =>
@@ -64,7 +65,7 @@ export default function Profile() {
     const reader = new FileReader();
     reader.onload = () => res(reader.result);
     reader.onerror = rej;
-    reader.readAsDataURL(file);        // Data-URI complète : “data:image/png;base64,…”
+    reader.readAsDataURL(file);
   });
 
 
@@ -171,12 +172,12 @@ const handleBannerChange = async (e) => {
     setOpenReplies((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Gérer le contenu des inputs (commentaires et réponses)
+  // Gérer le contenu des inputs
   const handleCommentChange = (key, text) => {
     setCommentInputs((prev) => ({ ...prev, [key]: text }));
   };
 
-  // Soumission commentaire ou réponse (parentReplyId facultatif)
+  // Soumission commentaire ou réponse
   const handleCommentSubmit = async (postId, parentReplyId, e) => {
     e.preventDefault();
     const key = parentReplyId ? `${postId}-${parentReplyId}` : postId;
@@ -291,9 +292,30 @@ const handleBannerChange = async (e) => {
 return (
   <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
    {editMode && (
-    <ThemeSwitch className="absolute top-4 right-4" />
-   )}
-    {/* ─────────── Bannière cliquable ─────────── */}
+      <>
+        <ThemeSwitch className="absolute top-4 right-4" />
+        <div className="mb-4 flex gap-2 justify-end">
+          <button onClick={() => setLang("fr")} aria-label="Français">
+            <Image
+              src="/flags/french flag.png"
+              alt="Français"
+              width={28}
+              height={20}
+              className={lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}
+            />
+          </button>
+          <button onClick={() => setLang("en")} aria-label="English">
+            <Image
+              src="/flags/english flag.png"
+              alt="English"
+              width={28}
+              height={20}
+              className={lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}
+            />
+          </button>
+        </div>
+      </>
+    )}
     <div
       className="relative h-36 bg-gray-100 cursor-pointer"
       onClick={() => editMode &&userId === profileId && bannerInputRef.current?.click()}
@@ -306,13 +328,13 @@ return (
         />
       ) : (
         <div className="flex items-center justify-center h-full text-black">
-          Pas de bannière
+          {dict.bannerMissing}
         </div>
       )}
 
       {editMode && (
         <span className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
-          Changer la bannière
+          {dict.changeBanner}
         </span>
       )}
 
@@ -335,7 +357,7 @@ return (
           />
         ) : (
           <div className="flex items-center justify-center h-full text-black">
-            No Img
+            {dict.noImg}
           </div>
         )}
       </div>
@@ -349,7 +371,7 @@ return (
           onClick={() => setEditMode(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
-          Modifier
+          {dict.edit}
         </button>
         </div>
       )}
@@ -470,7 +492,7 @@ return (
         )}
       </div>
 
-      {/* Posts */}
+
       <div className="border-t border-gray-200 p-6 space-y-8">
         {posts.length === 0 && (
           <p className="text-center text-gray-500">{dict.noPostToDisplay}</p>
@@ -523,7 +545,6 @@ return (
               </div>
 
 
-              {/* Formulaire commentaire principal */}
               {openComments[post._id] && (
                 <form
                   onSubmit={(e) => handleCommentSubmit(post._id, null, e)}
@@ -545,7 +566,6 @@ return (
                 </form>
               )}
 
-              {/* Affichage des réponses imbriquées */}
               {renderReplies(post._id, post.replies)}
             </div>
           );
