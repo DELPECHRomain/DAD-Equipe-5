@@ -69,6 +69,7 @@ export const dictionaries = {
     noNotifications: "Aucune notification.",
     likedYourPost: "a aimé votre post.",
     followedYou: "a commencé à vous suivre.",
+    changeBanner: "Changer la bannière",
   },
   en: {
     loading: "Loading...",
@@ -140,5 +141,6 @@ export const dictionaries = {
     noNotifications: "No notifications.",
     likedYourPost: "liked your post.",
     followedYou: "started following you.",
+    changeBanner: "Change Banner",
   }
 };

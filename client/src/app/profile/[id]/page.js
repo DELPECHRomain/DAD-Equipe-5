@@ -48,10 +48,10 @@ export default function Profile() {
   const avatarInputRef  = useRef(null);
   const bannerInputRef  = useRef(null);
 
-  // Gestion commentaires imbriqués
+  
   const [commentInputs, setCommentInputs] = useState({});
-  const [openComments, setOpenComments] = useState({}); // toggle formulaire commentaire principal par postId
-  const [openReplies, setOpenReplies] = useState({}); // toggle formulaire réponse imbriquée par clé composite
+  const [openComments, setOpenComments] = useState({}); 
+  const [openReplies, setOpenReplies] = useState({}); 
 
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -64,7 +64,7 @@ export default function Profile() {
     const reader = new FileReader();
     reader.onload = () => res(reader.result);
     reader.onerror = rej;
-    reader.readAsDataURL(file);        // Data-URI complète : “data:image/png;base64,…”
+    reader.readAsDataURL(file);
   });
 
 
@@ -171,12 +171,12 @@ const handleBannerChange = async (e) => {
     setOpenReplies((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Gérer le contenu des inputs (commentaires et réponses)
+  // Gérer le contenu des inputs
   const handleCommentChange = (key, text) => {
     setCommentInputs((prev) => ({ ...prev, [key]: text }));
   };
 
-  // Soumission commentaire ou réponse (parentReplyId facultatif)
+  // Soumission commentaire ou réponse
   const handleCommentSubmit = async (postId, parentReplyId, e) => {
     e.preventDefault();
     const key = parentReplyId ? `${postId}-${parentReplyId}` : postId;
@@ -293,7 +293,6 @@ return (
    {editMode && (
     <ThemeSwitch className="absolute top-4 right-4" />
    )}
-    {/* ─────────── Bannière cliquable ─────────── */}
     <div
       className="relative h-36 bg-gray-100 cursor-pointer"
       onClick={() => editMode &&userId === profileId && bannerInputRef.current?.click()}
@@ -306,13 +305,13 @@ return (
         />
       ) : (
         <div className="flex items-center justify-center h-full text-black">
-          Pas de bannière
+          {dict.bannerMissing}
         </div>
       )}
 
       {editMode && (
         <span className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
-          Changer la bannière
+          {dict.changeBanner}
         </span>
       )}
 
@@ -335,7 +334,7 @@ return (
           />
         ) : (
           <div className="flex items-center justify-center h-full text-black">
-            No Img
+            {dict.noImg}
           </div>
         )}
       </div>
@@ -349,7 +348,7 @@ return (
           onClick={() => setEditMode(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
         >
-          Modifier
+          {dict.edit}
         </button>
         </div>
       )}
@@ -470,7 +469,7 @@ return (
         )}
       </div>
 
-      {/* Posts */}
+
       <div className="border-t border-gray-200 p-6 space-y-8">
         {posts.length === 0 && (
           <p className="text-center text-gray-500">{dict.noPostToDisplay}</p>
@@ -523,7 +522,6 @@ return (
               </div>
 
 
-              {/* Formulaire commentaire principal */}
               {openComments[post._id] && (
                 <form
                   onSubmit={(e) => handleCommentSubmit(post._id, null, e)}
@@ -545,7 +543,6 @@ return (
                 </form>
               )}
 
-              {/* Affichage des réponses imbriquées */}
               {renderReplies(post._id, post.replies)}
             </div>
           );
