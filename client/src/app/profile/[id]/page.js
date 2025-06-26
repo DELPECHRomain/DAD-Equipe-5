@@ -301,7 +301,7 @@ return (
               alt="Français"
               width={28}
               height={20}
-              className={lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}
+             className={`french-img ${lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}`}
             />
           </button>
           <button onClick={() => setLang("en")} aria-label="English">
@@ -310,7 +310,7 @@ return (
               alt="English"
               width={28}
               height={20}
-              className={lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}
+               className={`english-img ${lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}`}
             />
           </button>
         </div>
