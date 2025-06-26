@@ -206,7 +206,7 @@ export default function Profile() {
                 type="submit"
                 className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
               >
-                Envoyer
+                {dict.send}
               </button>
             </form>
           )}
@@ -464,7 +464,7 @@ export default function Profile() {
                 >
                   <input
                     type="text"
-                    placeholder="Ajouter un commentaire..."
+                    placeholder={dict.addComment}
                     value={commentInputs[post._id] || ""}
                     onChange={(e) => handleCommentChange(post._id, e.target.value)}
                     className="flex-1 border border-gray-300 rounded-full px-3 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"

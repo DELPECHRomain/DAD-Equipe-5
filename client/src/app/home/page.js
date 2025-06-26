@@ -182,7 +182,7 @@ export default function HomeConnected() {
                 type="submit"
                 className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
               >
-                {dict.sendReply}
+                {dict.send}
               </button>
             </form>
           )}
@@ -304,7 +304,7 @@ export default function HomeConnected() {
                         type="submit"
                         className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
                       >
-                        {dict.sendReply}
+                        {dict.send}
                       </button>
                     </form>
                   </>

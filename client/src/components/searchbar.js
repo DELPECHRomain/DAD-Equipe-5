@@ -20,7 +20,6 @@ export default function Searchbar() {
   const [posts, setPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
 
-  // Recherche automatique à chaque changement de searchQuery (avec debounce)
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setSearchResults([]);
@@ -29,7 +28,7 @@ export default function Searchbar() {
 
     const delayDebounceFn = setTimeout(() => {
       handleSearch();
-    }, 300); // 300ms debounce
+    }, 300); 
 
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
