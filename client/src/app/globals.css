@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #e7ecf0;
+}
+
+
+html.dark {
+filter: invert(1) hue-rotate(180deg);
+}
+html.dark .avatar-img,
+html.dark .french-img,
+html.dark .english-img,
+html.dark .french1-img,
+html.dark .banner-img {
+  filter: invert(1) hue-rotate(180deg);
+}
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #e7ecf0;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.text-blue-600 {
+  color: #2563eb !important;
+}
