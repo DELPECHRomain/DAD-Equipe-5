@@ -23,14 +23,14 @@ export default function Navbar() {
             <span className="text-2xl font-bold">Breezy</span>
           </Link>
 
-          <div className="mb-4 flex gap-2">
+          <div className="mb-4 flex gap-2 ">
             <button onClick={() => setLang("fr")}>
               <Image
                 src="/flags/french flag.png"
                 alt="Français"
                 width={28}
                 height={20}
-                className={lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}
+                 className={`french-img ${lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}`}
               />
             </button>
             <button onClick={() => setLang("en")}>
@@ -39,7 +39,7 @@ export default function Navbar() {
                 alt="English"
                 width={28}
                 height={20}
-                className={lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}
+                 className={`english-img ${lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}`}
               />
             </button>
           </div>
