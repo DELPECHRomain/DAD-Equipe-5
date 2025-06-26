@@ -6,9 +6,13 @@ import { FaFeatherAlt } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 import LogoutButton from "./LogoutButton";
 import Image from "next/image";
+import { useLang } from "@/context/LangContext";
+import { dictionaries } from "@/utils/dictionaries";
 
 export default function Navbar() {
   const { accessToken, userId } = useAuth();
+  const { lang, setLang } = useLang();
+  const dict = dictionaries[lang];
 
   return (
     <>
@@ -19,6 +23,26 @@ export default function Navbar() {
             <span className="text-2xl font-bold">Breezy</span>
           </Link>
 
+          <div className="mb-4 flex gap-2">
+            <button onClick={() => setLang("fr")}>
+              <Image
+                src="/flags/french flag.png"
+                alt="Français"
+                width={28}
+                height={20}
+                className={lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}
+              />
+            </button>
+            <button onClick={() => setLang("en")}>
+              <Image
+                src="/flags/english flag.png"
+                alt="English"
+                width={28}
+                height={20}
+                className={lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}
+              />
+            </button>
+          </div>
 
           <div className="space-y-6">
             <Link
@@ -26,7 +50,7 @@ export default function Navbar() {
               className="flex items-center gap-4 text-xl hover:text-indigo-600 transition"
             >
               <AiOutlineHome size={28} />
-              <span>Accueil</span>
+              <span>{dict.home}</span>
             </Link>
 
             <Link
@@ -34,7 +58,7 @@ export default function Navbar() {
               className="flex items-center gap-4 text-xl hover:text-indigo-600 transition"
             >
               <AiOutlineBell size={28} />
-              <span>Notifications</span>
+              <span>{dict.notifications}</span>
 
             </Link>
 
@@ -43,7 +67,7 @@ export default function Navbar() {
               className="flex items-center gap-4 text-xl hover:text-indigo-600 transition"
             >
               <AiOutlineSearch size={28} />
-              <span>Search</span>
+              <span>{dict.search}</span>
             </Link>
 
             <Link
@@ -51,7 +75,7 @@ export default function Navbar() {
               className="flex items-center gap-4 text-xl hover:text-indigo-600 transition"
             >
               <AiOutlineUser size={28} />
-              <span>Profil</span>
+              <span>{dict.profile}</span>
             </Link>
 
             {accessToken && (
@@ -68,7 +92,7 @@ export default function Navbar() {
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-full flex items-center justify-center gap-2 mt-6"
           >
             <FaFeatherAlt />
-            <span className="hidden lg:inline">Poster</span>
+            <span className="hidden lg:inline">{dict.post}</span>
           </Link>
         )}
       </nav>

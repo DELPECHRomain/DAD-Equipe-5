@@ -45,7 +45,8 @@ exports.createPost = async (req, res) => {
       content: content.trim(),
       media: Array.isArray(media) ? media : [],
       likes: [],
-      replies: []
+      replies: [],
+      hashtags: content.match(/#\w+/g) || [],
     });
 
     await post.save();
@@ -251,6 +252,37 @@ exports.getPostsByFollowing = async (req, res) => {
 
     res.json(postsWithUserData);
 
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getPostsByHashtag = async (req, res) => {
+  try {
+    let tag = req.params.tag;
+    if (!tag.startsWith("#")) tag = "#" + tag;
+    const posts = await Post.find({ hashtags: { $in: [new RegExp(`^${tag}$`, "i")] } }).sort({ createdAt: -1 });
+
+    const postsWithUserData = await Promise.all(posts.map(async (post) => {
+      const user = await getFullUserData(post.userId);
+      const repliesWithUser = await Promise.all(post.replies.map(async function enrichReply(reply) {
+        const replyUser = await getFullUserData(reply.userId);
+        const nestedReplies = reply.replies ? await Promise.all(reply.replies.map(enrichReply)) : [];
+        return {
+          ...reply.toObject(),
+          user: replyUser || null,
+          replies: nestedReplies
+        };
+      }));
+
+      return {
+        ...post.toObject(),
+        user: user || null,
+        replies: repliesWithUser
+      };
+    }));
+
+    res.json(postsWithUserData);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

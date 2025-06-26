@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { createPost } from "@/utils/api";
+import { useLang } from "@/context/LangContext";
+import { dictionaries } from "@/utils/dictionaries";
 
 export default function CreatePost() {
   const { accessToken, userId, isLoading } = useAuth();
@@ -12,6 +14,9 @@ export default function CreatePost() {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const { lang } = useLang();
+  const dict = dictionaries[lang];
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
@@ -24,7 +29,7 @@ export default function CreatePost() {
     e.preventDefault();
 
     if (!content.trim()) {
-      setError("Le contenu ne peut pas être vide.");
+      setError("{dict.emptyPost}");
       return;
     }
 
@@ -39,7 +44,7 @@ export default function CreatePost() {
       setLoading(false);
       setError(
         err.response?.data?.message ||
-        "Une erreur est survenue lors de la création du post."
+        dict.postError
       );
     }
   };
@@ -47,20 +52,20 @@ export default function CreatePost() {
   if (isLoading || !accessToken) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Chargement...</p>
+        <p className="text-gray-600">{dict.loading}</p>
       </div>
     );
   }
 
   return (
     <div className="max-w-xl mx-auto p-6">
-      <h1 className="text-3xl text-black font-bold mb-6">Créer un post</h1>
+      <h1 className="text-3xl text-black font-bold mb-6">{dict.createPost}</h1>
 
       <form onSubmit={handleSubmit}>
         <textarea
           className="text-black w-full border border-gray-300 rounded-md p-3 resize-none focus:ring-2 focus:ring-indigo-500"
           rows={5}
-          placeholder="Quoi de neuf ?"
+          placeholder={dict.whatsUp}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           maxLength={280}
@@ -68,7 +73,7 @@ export default function CreatePost() {
         />
 
         <div className="text-black flex justify-between items-center mt-2 text-sm">
-          <span>{280 - content.length} caractères restants</span>
+          <span>{280 - content.length} {dict.charsLeft}</span>
         </div>
 
         {error && <p className="text-red-500 mt-2">{error}</p>}
@@ -80,7 +85,7 @@ export default function CreatePost() {
             content.trim() ? "bg-indigo-600 hover:bg-indigo-700" : "bg-gray-300"
           } text-white font-semibold py-2 px-6 rounded-full`}
         >
-          {loading ? "Publication..." : "Publier"}
+          {loading ? dict.posting : dict.postBtn}
         </button>
       </form>
     </div>

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Loader from "@/components/Loader";
 import Link from "next/link";
+import { useLang } from "@/context/LangContext";
+import { dictionaries } from "@/utils/dictionaries";
 
 
 export default function RegisterPage() {
@@ -18,6 +20,9 @@ export default function RegisterPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(true);
+
+    const { lang } = useLang();
+    const dict = dictionaries[lang];
 
     useEffect(() => {
         setLoading(true);
@@ -36,7 +41,7 @@ export default function RegisterPage() {
             await register(username, email, password);
             router.push('/login');
         } catch (error) {
-            setError(error.message || 'Registration failed');
+            setError(error.message || dict.registerFailed);
         } finally {
             setLoading(false);
         }
@@ -64,8 +69,8 @@ export default function RegisterPage() {
             </div>
 
             <div className="flex flex-col items-center justify-center w-full md:w-1/2 p-8">
-                <h1 className="text-5xl font-bold mb-6 text-black">Créer votre compte</h1>
-                <p className="text-gray-400 text-lg mb-8 text-center">Rejoignez la brise et partagez vos idées.</p>
+                <h1 className="text-5xl font-bold mb-6 text-black">{dict.createAccount}</h1>
+                <p className="text-gray-400 text-lg mb-8 text-center">{dict.registerSubtitle}</p>
 
                 <form onSubmit={handleSubmit} className="space-y-5 w-full max-w-sm">
                     <input
@@ -74,7 +79,7 @@ export default function RegisterPage() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
-                        placeholder="Nom d'utilisateur"
+                        placeholder={dict.username}
                         className="bg-white border-indigo-800 text-black w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <input
@@ -83,7 +88,7 @@ export default function RegisterPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        placeholder="Adresse mail"
+                        placeholder={dict.email}
                         className="bg-white border-indigo-800 text-black w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <input
@@ -92,14 +97,14 @@ export default function RegisterPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        placeholder="Mot de passe"
+                        placeholder={dict.password}
                         className="bg-white border-indigo-800 text-black w-full px-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
 
                     <button
                         type="submit"
                         className="w-full py-3 rounded-full text-white font-semibold bg-indigo-800 hover:bg-indigo-700 transition cursor-pointer">
-                        S'inscrire
+                        {dict.register}
                     </button>
 
                     {error && (
@@ -109,13 +114,13 @@ export default function RegisterPage() {
 
                 <div className="flex items-center my-6 w-full max-w-sm">
                     <div className="flex-grow border-t border-gray-300"></div>
-                    <span className="mx-4 text-gray-600 font-semibold">ou</span>
+                    <span className="mx-4 text-gray-600 font-semibold">{dict.orDivider}</span>
                     <div className="flex-grow border-t border-gray-300"></div>
                 </div>
 
                 <Link href="/login" className="w-full max-w-sm">
                     <button className="w-full py-3 px-4 rounded-full bg-white border text-indigo-800 border-indigo-800 font-semibold hover:bg-indigo-50 transition cursor-pointer">
-                        Se connecter
+                        {dict.connect}
                     </button>
                 </Link>
             </div>

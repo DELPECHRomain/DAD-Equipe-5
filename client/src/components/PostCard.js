@@ -4,10 +4,14 @@ import { useState } from "react";
 import { toggleLike, addReply } from "@/utils/api";
 import { useAuth } from "@/context/AuthContext";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { useLang } from "@/context/LangContext";
+import { dictionaries } from "@/utils/dictionaries";
 
 export default function PostCard({ post, onUpdatePost }) {
   const { accessToken, userId } = useAuth();
   const [commentContent, setCommentContent] = useState("");
+  const { lang } = useLang();
+  const dict = dictionaries[lang];
 
   const handleLike = async () => {
     try {
@@ -30,9 +34,31 @@ export default function PostCard({ post, onUpdatePost }) {
     }
   };
 
+  function formatHashtags(content) {
+  return content.split(/(\s+)/).map((part, i) => {
+    const match = part.match(/^(#\w+)(\W*)$/);
+    if (match) {
+      const tag = match[1].substring(1);
+      const after = match[2];
+      return (
+        <span key={i}>
+          <a
+            href={`/hashtag/${tag}`}
+            className="text-blue-600 underline cursor-pointer"
+          >
+            {match[1]}
+          </a>
+          {after}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
   return (
     <div className="border-b border-gray-200 py-4">
-      <p className="text-black">{post.content}</p>
+      <p className="text-black">{formatHashtags(post.content)}</p>
 
       {post.media?.length > 0 && (
         <div className="mt-2 flex gap-2 flex-wrap">
@@ -54,7 +80,7 @@ export default function PostCard({ post, onUpdatePost }) {
 
       {/* Commentaires */}
       <div className="mt-2">
-        <p className="text-sm font-semibold text-black">{post.replies.length} commentaires</p>
+        <p className="text-sm font-semibold text-black">{post.replies.length} {dict.comments}</p>
         {post.replies.map((r) => (
           <div key={r.replyId} className="text-gray-700 text-sm mt-1">
             ➝ {r.content}
@@ -67,10 +93,10 @@ export default function PostCard({ post, onUpdatePost }) {
         <input
           value={commentContent}
           onChange={(e) => setCommentContent(e.target.value)}
-          placeholder="Ajouter un commentaire..."
+          placeholder={dict.addComment}
           className="flex-1 border border-gray-300 rounded px-2 py-1 text-black"
         />
-        <button type="submit" className="text-blue-600 font-semibold">Envoyer</button>
+        <button type="submit" className="text-blue-600 font-semibold">{dict.send}</button>
       </form>
     </div>
   );

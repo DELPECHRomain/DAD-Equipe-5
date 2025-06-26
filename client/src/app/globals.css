@@ -32,3 +32,7 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.text-blue-600 {
+  color: #2563eb !important;
+}

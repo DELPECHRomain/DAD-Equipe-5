@@ -18,8 +18,13 @@ import {
   AiFillHeart,
 } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
+<<<<<<< Hashtags-funcitonnal
+import { useLang } from "@/context/LangContext";
+import { dictionaries } from "@/utils/dictionaries";
+=======
 import ThemeSwitch from "@/components/ThemeSwitch";
 
+>>>>>>> development
 
 export default function Profile() {
   const { accessToken, username, userId } = useAuth();
@@ -50,6 +55,10 @@ export default function Profile() {
 
   const [isFollowing, setIsFollowing] = useState(false);
 
+<<<<<<< Hashtags-funcitonnal
+  const { lang } = useLang();
+  const dict = dictionaries[lang];
+=======
   const fileToBase64 = (file) =>
   new Promise((res, rej) => {
     const reader = new FileReader();
@@ -57,6 +66,7 @@ export default function Profile() {
     reader.onerror = rej;
     reader.readAsDataURL(file);        // Data-URI complète : “data:image/png;base64,…”
   });
+>>>>>>> development
 
   useEffect(() => {
     if (profile && profile.followers) {
@@ -213,7 +223,7 @@ const handleBannerChange = async (e) => {
             onClick={() => toggleReplyInput(key)}
             className="text-sm text-blue-500 hover:underline mt-1"
           >
-            {openReplies[key] ? "Annuler" : "Répondre"}
+            {openReplies[key] ? dict.cancel : dict.reply}
           </button>
 
           {openReplies[key] && (
@@ -223,7 +233,7 @@ const handleBannerChange = async (e) => {
             >
               <input
                 type="text"
-                placeholder="Répondre…"
+                placeholder={dict.reply}
                 value={commentInputs[key] || ""}
                 onChange={(e) => handleCommentChange(key, e.target.value)}
                 className="flex-1 border border-gray-300 rounded-full px-3 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -232,7 +242,7 @@ const handleBannerChange = async (e) => {
                 type="submit"
                 className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
               >
-                Envoyer
+                {dict.send}
               </button>
             </form>
           )}
@@ -243,9 +253,31 @@ const handleBannerChange = async (e) => {
     });
   };
 
+  function formatHashtags(content) {
+  return content.split(/(\s+)/).map((part, i) => {
+    const match = part.match(/^(#\w+)(\W*)$/);
+    if (match) {
+      const tag = match[1].substring(1);
+      const after = match[2];
+      return (
+        <span key={i}>
+          <a
+            href={`/hashtag/${tag}`}
+            className="text-blue-600 underline cursor-pointer"
+          >
+            {match[1]}
+          </a>
+          {after}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center">Chargement...</div>
+      <div className="min-h-screen flex items-center justify-center">{dict.loading}</div>
     );
   if (error)
     return (
@@ -253,7 +285,7 @@ const handleBannerChange = async (e) => {
     );
   if (!profile)
     return (
-      <div className="min-h-screen flex items-center justify-center">Profil introuvable.</div>
+      <div className="min-h-screen flex items-center justify-center">{dict.notFound}</div>
     );
 
 return (
@@ -297,6 +329,38 @@ return (
       >
         {profile.profileImage ? (
           <img
+<<<<<<< Hashtags-funcitonnal
+            src={profile.noImg}
+            alt="Bannière"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-black">
+            {dict.bannerMissing}
+          </div>
+        )}
+        <div className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg">
+          {profile.profileImage ? (
+            <img
+              src={profile.profileImage}
+              alt="Photo profil"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-black">
+              {dict.noProfileImage}
+            </div>
+          )}
+        </div>
+        {!editMode && userId === profileId && (
+          <button
+            onClick={() => setEditMode(true)}
+            className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          >
+            {dict.editProfile}
+          </button>
+        )}
+=======
             src={profile.profileImage}
             alt="Photo profil"
             className="w-full h-full object-cover avatar-img"
@@ -306,6 +370,7 @@ return (
             No Img
           </div>
         )}
+>>>>>>> development
       </div>
 
   
@@ -350,8 +415,8 @@ return (
             </div>
 
             <div className="flex gap-8 mt-6 text-black font-semibold text-sm border-t border-gray-200 pt-4">
-              <div><span>{profile.followers?.length || 0}</span> abonnés</div>
-              <div><span>{profile.following?.length || 0}</span> abonnements</div>
+              <div><span>{profile.followers?.length || 0}</span> {dict.followers}</div>
+              <div><span>{profile.following?.length || 0}</span> {dict.following}</div>
             </div>
             {userId !== profileId && (
               <button
@@ -367,7 +432,7 @@ return (
           <form onSubmit={handleSubmit} className="space-y-4 text-black">
             <div>
               <label htmlFor="displayName" className="block font-semibold mb-1">
-                Nom d’affichage
+                {dict.displayName}
               </label>
               <input
                 type="text"
@@ -381,7 +446,7 @@ return (
             </div>
             <div>
               <label htmlFor="bio" className="block font-semibold mb-1">
-                Bio
+                {dict.bio}
               </label>
               <textarea
                 id="bio"
@@ -394,7 +459,7 @@ return (
             </div>
             <div>
               <label htmlFor="location" className="block font-semibold mb-1">
-                Localisation
+                {dict.location}
               </label>
               <input
                 type="text"
@@ -407,7 +472,7 @@ return (
             </div>
             <div>
               <label htmlFor="website" className="block font-semibold mb-1">
-                Site web
+                {dict.website}
               </label>
               <input
                 type="url"
@@ -424,14 +489,14 @@ return (
                 type="submit"
                 className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
               >
-                Enregistrer
+                {dict.save}
               </button>
               <button
                 type="button"
                 onClick={() => setEditMode(false)}
                 className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500 transition"
               >
-                Annuler
+                {dict.cancel}
               </button>
             </div>
           </form>
@@ -441,7 +506,7 @@ return (
       {/* Posts */}
       <div className="border-t border-gray-200 p-6 space-y-8">
         {posts.length === 0 && (
-          <p className="text-center text-gray-500">Aucun post à afficher.</p>
+          <p className="text-center text-gray-500">{dict.noPostToDisplay}</p>
         )}
 
         {posts.map((post) => {
@@ -465,7 +530,7 @@ return (
                 </div>
               </div>
 
-              <p className="text-black mb-2">{post.content}</p>
+              <div className="mb-2 text-black">{formatHashtags(post.content)}</div>
 
               <div className="flex items-center gap-4 mb-2">
                 <button
@@ -499,7 +564,7 @@ return (
                 >
                   <input
                     type="text"
-                    placeholder="Ajouter un commentaire..."
+                    placeholder={dict.addComment}
                     value={commentInputs[post._id] || ""}
                     onChange={(e) => handleCommentChange(post._id, e.target.value)}
                     className="flex-1 border border-gray-300 rounded-full px-3 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -508,7 +573,7 @@ return (
                     type="submit"
                     className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
                   >
-                    Envoyer
+                    {dict.send}
                   </button>
                 </form>
               )}

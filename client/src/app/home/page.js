@@ -7,6 +7,8 @@ import { searchProfiles, fetchUserProfile, toggleLike, addReply, fetchFollowingP
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
 import SearchBar from "@/components/searchbar";
+import { useLang } from "@/context/LangContext";
+import { dictionaries } from "@/utils/dictionaries";
 
 export default function HomeConnected() {
   const { accessToken, isLoading, userId } = useAuth();
@@ -22,6 +24,9 @@ export default function HomeConnected() {
   const [commentInputs, setCommentInputs] = useState({});
   const [openComments, setOpenComments] = useState({});
   const [openReplies, setOpenReplies] = useState({}); // pour ouvrir formulaire de réponse sur un reply
+
+  const { lang } = useLang();
+  const dict = dictionaries[lang];
 
   // Recherche automatique à chaque changement de searchQuery (avec debounce)
   useEffect(() => {
@@ -158,7 +163,7 @@ export default function HomeConnected() {
             onClick={() => toggleReplyInput(key)}
             className="text-sm text-blue-500 hover:underline mt-1"
           >
-            {openReplies[key] ? "Annuler" : "Répondre"}
+            {openReplies[key] ? dict.cancel : dict.reply}
           </button>
 
           {openReplies[key] && (
@@ -168,7 +173,7 @@ export default function HomeConnected() {
             >
               <input
                 type="text"
-                placeholder="Répondre…"
+                placeholder={dict.reply}
                 value={commentInputs[key] || ""}
                 onChange={(e) => handleCommentChange(key, e.target.value)}
                 className="flex-1 border border-gray-300 rounded-full px-3 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -177,7 +182,7 @@ export default function HomeConnected() {
                 type="submit"
                 className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
               >
-                Envoyer
+                {dict.send}
               </button>
             </form>
           )}
@@ -193,7 +198,7 @@ export default function HomeConnected() {
   if (isLoading || loadingPosts) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Chargement...</p>
+        <p className="text-gray-600">{dict.loading}</p>
       </div>
     );
   }
@@ -201,20 +206,41 @@ export default function HomeConnected() {
   if (!accessToken) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Redirecting to login...</p>
+        <p className="text-gray-600">{dict.redirecting}</p>
       </div>
     );
   }
+    function formatHashtags(content) {
+  return content.split(/(\s+)/).map((part, i) => {
+    const match = part.match(/^(#\w+)(\W*)$/);
+    if (match) {
+      const tag = match[1].substring(1);
+      const after = match[2];
+      return (
+        <span key={i}>
+          <a
+            href={`/hashtag/${tag}`}
+            className="text-blue-600 underline cursor-pointer"
+          >
+            {match[1]}
+          </a>
+          {after}
+        </span>
+      );
+    }
+    return part;
+  });
+}
 
   return (
     <div className="flex bg-white min-h-screen text-black">
       <main className="flex-1 md:ml-64 max-w-2xl border-x border-gray-200 min-h-screen">
         <header className="p-4 border-b border-gray-200 sticky top-0 bg-white z-10">
-          <h1 className="text-2xl font-bold">Accueil</h1>
+          <h1 className="text-2xl font-bold">{dict.homeTitle}</h1>
         </header>
 
         {posts.length === 0 ? (
-          <div className="p-4 text-gray-600">Aucun posts pour le moment.</div>
+          <div className="p-4 text-gray-600">{dict.noPostToDisplay}</div>
         ) : (
           posts.map((post) => {
             const likedByUser = post.likes?.includes(userId);
@@ -228,7 +254,7 @@ export default function HomeConnected() {
                     {new Date(post.createdAt).toLocaleString()}
                   </span>
                 </div>
-                <p className="mt-2 text-gray-800">{post.content}</p>
+                <div className="mb-2 text-black">{formatHashtags(post.content)}</div>
 
                 <div className="flex items-center justify-between mt-3 text-gray-500 text-sm">
                   <button
@@ -259,7 +285,7 @@ export default function HomeConnected() {
                       {post.replies && post.replies.length > 0 ? (
                         renderReplies(post._id, post.replies)
                       ) : (
-                        <p className="text-gray-400 text-sm">Pas encore de commentaires</p>
+                        <p className="text-gray-400 text-sm">{dict.noCommentsYet}</p>
                       )}
                     </div>
 
@@ -269,7 +295,7 @@ export default function HomeConnected() {
                     >
                       <input
                         type="text"
-                        placeholder="Répondre…"
+                        placeholder={dict.reply}
                         value={commentInputs[post._id] || ""}
                         onChange={(e) => handleCommentChange(post._id, e.target.value)}
                         className="flex-1 border border-gray-300 rounded-full px-4 py-1 text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -278,7 +304,7 @@ export default function HomeConnected() {
                         type="submit"
                         className="bg-blue-600 text-white px-3 py-1 rounded-full hover:bg-blue-700 transition"
                       >
-                        Envoyer
+                        {dict.send}
                       </button>
                     </form>
                   </>

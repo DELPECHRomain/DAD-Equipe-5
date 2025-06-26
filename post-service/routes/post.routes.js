@@ -8,6 +8,7 @@ router.get('/posts/user/:userId', postController.getPostsByUser);
 router.post('/posts/:postId/replies', postController.addReply);
 router.post('/posts/:postId/like', postController.toggleLike);
 router.post('/posts/following', postController.getPostsByFollowing);
+router.get('/posts/hashtag/:tag', postController.getPostsByHashtag);
 
 
 module.exports = router;
