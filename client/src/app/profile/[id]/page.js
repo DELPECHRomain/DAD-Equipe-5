@@ -18,13 +18,13 @@ import {
   AiFillHeart,
 } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
-<<<<<<< Hashtags-funcitonnal
+
 import { useLang } from "@/context/LangContext";
 import { dictionaries } from "@/utils/dictionaries";
-=======
+
 import ThemeSwitch from "@/components/ThemeSwitch";
 
->>>>>>> development
+
 
 export default function Profile() {
   const { accessToken, username, userId } = useAuth();
@@ -55,10 +55,10 @@ export default function Profile() {
 
   const [isFollowing, setIsFollowing] = useState(false);
 
-<<<<<<< Hashtags-funcitonnal
+
   const { lang } = useLang();
   const dict = dictionaries[lang];
-=======
+
   const fileToBase64 = (file) =>
   new Promise((res, rej) => {
     const reader = new FileReader();
@@ -66,7 +66,7 @@ export default function Profile() {
     reader.onerror = rej;
     reader.readAsDataURL(file);        // Data-URI complète : “data:image/png;base64,…”
   });
->>>>>>> development
+
 
   useEffect(() => {
     if (profile && profile.followers) {
@@ -329,38 +329,6 @@ return (
       >
         {profile.profileImage ? (
           <img
-<<<<<<< Hashtags-funcitonnal
-            src={profile.noImg}
-            alt="Bannière"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-black">
-            {dict.bannerMissing}
-          </div>
-        )}
-        <div className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg">
-          {profile.profileImage ? (
-            <img
-              src={profile.profileImage}
-              alt="Photo profil"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-black">
-              {dict.noProfileImage}
-            </div>
-          )}
-        </div>
-        {!editMode && userId === profileId && (
-          <button
-            onClick={() => setEditMode(true)}
-            className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-          >
-            {dict.editProfile}
-          </button>
-        )}
-=======
             src={profile.profileImage}
             alt="Photo profil"
             className="w-full h-full object-cover avatar-img"
@@ -370,7 +338,6 @@ return (
             No Img
           </div>
         )}
->>>>>>> development
       </div>
 
   
