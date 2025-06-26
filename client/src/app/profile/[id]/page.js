@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useParams } from "next/navigation";
 import {
@@ -18,8 +18,13 @@ import {
   AiFillHeart,
 } from "react-icons/ai";
 import { FaRegCommentDots } from "react-icons/fa";
+<<<<<<< Hashtags-funcitonnal
 import { useLang } from "@/context/LangContext";
 import { dictionaries } from "@/utils/dictionaries";
+=======
+import ThemeSwitch from "@/components/ThemeSwitch";
+
+>>>>>>> development
 
 export default function Profile() {
   const { accessToken, username, userId } = useAuth();
@@ -37,7 +42,11 @@ export default function Profile() {
     bio: "",
     location: "",
     website: "",
+    profileImage: "",
+    bannerImage: "",
   });
+  const avatarInputRef  = useRef(null);
+  const bannerInputRef  = useRef(null);
 
   // Gestion commentaires imbriqués
   const [commentInputs, setCommentInputs] = useState({});
@@ -46,8 +55,18 @@ export default function Profile() {
 
   const [isFollowing, setIsFollowing] = useState(false);
 
+<<<<<<< Hashtags-funcitonnal
   const { lang } = useLang();
   const dict = dictionaries[lang];
+=======
+  const fileToBase64 = (file) =>
+  new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);        // Data-URI complète : “data:image/png;base64,…”
+  });
+>>>>>>> development
 
   useEffect(() => {
     if (profile && profile.followers) {
@@ -76,6 +95,8 @@ export default function Profile() {
           bio: data.bio || "",
           location: data.location || "",
           website: data.website || "",
+          profileImage: data.profileImage || "",   
+          bannerImage:  data.bannerImage  || "",
         });
         return fetchUserPosts(accessToken, profileId);
       })
@@ -100,6 +121,21 @@ export default function Profile() {
       console.log(err);
     }
   };
+  const handleAvatarChange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const dataUri = await fileToBase64(file);
+  setFormData((p) => ({ ...p, profileImage: dataUri }));
+  setProfile((p) => ({ ...p, profileImage: dataUri }));
+};
+
+const handleBannerChange = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const dataUri = await fileToBase64(file);
+  setFormData((p) => ({ ...p, bannerImage: dataUri }));
+  setProfile((p) => ({ ...p, bannerImage: dataUri }));
+};
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -252,11 +288,48 @@ export default function Profile() {
       <div className="min-h-screen flex items-center justify-center">{dict.notFound}</div>
     );
 
-  return (
-    <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
-      <div className="relative h-36 bg-gray-100">
-        {profile.bannerImage ? (
+return (
+  <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
+   {editMode && (
+    <ThemeSwitch className="absolute top-4 right-4" />
+   )}
+    {/* ─────────── Bannière cliquable ─────────── */}
+    <div
+      className="relative h-36 bg-gray-100 cursor-pointer"
+      onClick={() => editMode &&userId === profileId && bannerInputRef.current?.click()}
+    >
+      {profile.bannerImage ? (
+        <img
+          src={profile.bannerImage}
+          alt="Bannière"
+          className="w-full h-full object-cover banner-img"
+        />
+      ) : (
+        <div className="flex items-center justify-center h-full text-black">
+          Pas de bannière
+        </div>
+      )}
+
+      {editMode && (
+        <span className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
+          Changer la bannière
+        </span>
+      )}
+
+      <div
+        className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg cursor-pointer"
+
+        onClick={(e) => {
+          e.stopPropagation(); 
+          if (editMode && userId === profileId){  avatarInputRef.current?.click();
+
+          }
+        }}
+
+      >
+        {profile.profileImage ? (
           <img
+<<<<<<< Hashtags-funcitonnal
             src={profile.noImg}
             alt="Bannière"
             className="w-full h-full object-cover"
@@ -287,7 +360,33 @@ export default function Profile() {
             {dict.editProfile}
           </button>
         )}
+=======
+            src={profile.profileImage}
+            alt="Photo profil"
+            className="w-full h-full object-cover avatar-img"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-black">
+            No Img
+          </div>
+        )}
+>>>>>>> development
       </div>
+
+  
+    </div>
+
+      {!editMode && userId === profileId && (
+        <div className="mt-4 px-6 flex justify-end">
+        <button
+          onClick={() => setEditMode(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+        >
+          Modifier
+        </button>
+        </div>
+      )}
+
 
       <div className="mt-16 px-6 pb-6">
         {!editMode ? (
@@ -456,6 +555,7 @@ export default function Profile() {
                 </button>
               </div>
 
+
               {/* Formulaire commentaire principal */}
               {openComments[post._id] && (
                 <form
@@ -484,6 +584,22 @@ export default function Profile() {
           );
         })}
       </div>
-    </div>
+       <input
+    type="file"
+    accept="image/*"
+    ref={avatarInputRef}
+    className="hidden"
+    onChange={handleAvatarChange}
+  />
+  <input
+    type="file"
+    accept="image/*"
+    ref={bannerInputRef}
+    className="hidden"
+    onChange={handleBannerChange}
+  />
+
+</div>  
+    
   );
 }

@@ -4,6 +4,7 @@ import { LangProvider } from "@/context/LangContext";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import ClientOnly from "@/components/ClientOnly";
+import ThemeSwitch from "@/components/ThemeSwitch";
 
 
 export default function RootLayout({ children }) {
