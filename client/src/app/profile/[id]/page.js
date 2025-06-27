@@ -24,6 +24,7 @@ import Image from "next/image";
 import { dictionaries } from "@/utils/dictionaries";
 
 import ThemeSwitch from "@/components/ThemeSwitch";
+import LogoutButton from "@/components/LogoutButton";
 
 
 
@@ -46,13 +47,13 @@ export default function Profile() {
     profileImage: "",
     bannerImage: "",
   });
-  const avatarInputRef  = useRef(null);
-  const bannerInputRef  = useRef(null);
+  const avatarInputRef = useRef(null);
+  const bannerInputRef = useRef(null);
 
-  
+
   const [commentInputs, setCommentInputs] = useState({});
-  const [openComments, setOpenComments] = useState({}); 
-  const [openReplies, setOpenReplies] = useState({}); 
+  const [openComments, setOpenComments] = useState({});
+  const [openReplies, setOpenReplies] = useState({});
 
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -61,12 +62,12 @@ export default function Profile() {
   const dict = dictionaries[lang];
 
   const fileToBase64 = (file) =>
-  new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload = () => res(reader.result);
-    reader.onerror = rej;
-    reader.readAsDataURL(file);
-  });
+    new Promise((res, rej) => {
+      const reader = new FileReader();
+      reader.onload = () => res(reader.result);
+      reader.onerror = rej;
+      reader.readAsDataURL(file);
+    });
 
 
   useEffect(() => {
@@ -96,8 +97,8 @@ export default function Profile() {
           bio: data.bio || "",
           location: data.location || "",
           website: data.website || "",
-          profileImage: data.profileImage || "",   
-          bannerImage:  data.bannerImage  || "",
+          profileImage: data.profileImage || "",
+          bannerImage: data.bannerImage || "",
         });
         return fetchUserPosts(accessToken, profileId);
       })
@@ -123,20 +124,20 @@ export default function Profile() {
     }
   };
   const handleAvatarChange = async (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  const dataUri = await fileToBase64(file);
-  setFormData((p) => ({ ...p, profileImage: dataUri }));
-  setProfile((p) => ({ ...p, profileImage: dataUri }));
-};
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const dataUri = await fileToBase64(file);
+    setFormData((p) => ({ ...p, profileImage: dataUri }));
+    setProfile((p) => ({ ...p, profileImage: dataUri }));
+  };
 
-const handleBannerChange = async (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-  const dataUri = await fileToBase64(file);
-  setFormData((p) => ({ ...p, bannerImage: dataUri }));
-  setProfile((p) => ({ ...p, bannerImage: dataUri }));
-};
+  const handleBannerChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const dataUri = await fileToBase64(file);
+    setFormData((p) => ({ ...p, bannerImage: dataUri }));
+    setProfile((p) => ({ ...p, bannerImage: dataUri }));
+  };
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -255,26 +256,26 @@ const handleBannerChange = async (e) => {
   };
 
   function formatHashtags(content) {
-  return content.split(/(\s+)/).map((part, i) => {
-    const match = part.match(/^(#\w+)(\W*)$/);
-    if (match) {
-      const tag = match[1].substring(1);
-      const after = match[2];
-      return (
-        <span key={i}>
-          <a
-            href={`/hashtag/${tag}`}
-            className="text-blue-600 underline cursor-pointer"
-          >
-            {match[1]}
-          </a>
-          {after}
-        </span>
-      );
-    }
-    return part;
-  });
-}
+    return content.split(/(\s+)/).map((part, i) => {
+      const match = part.match(/^(#\w+)(\W*)$/);
+      if (match) {
+        const tag = match[1].substring(1);
+        const after = match[2];
+        return (
+          <span key={i}>
+            <a
+              href={`/hashtag/${tag}`}
+              className="text-blue-600 underline cursor-pointer"
+            >
+              {match[1]}
+            </a>
+            {after}
+          </span>
+        );
+      }
+      return part;
+    });
+  }
 
   if (loading)
     return (
@@ -289,6 +290,7 @@ const handleBannerChange = async (e) => {
       <div className="min-h-screen flex items-center justify-center">{dict.notFound}</div>
     );
 
+<<<<<<< Updated upstream
 return (
   <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
    {editMode && (
@@ -332,47 +334,99 @@ return (
         </div>
       )}
 
+=======
+  return (
+    <div className="max-w-2xl mx-auto bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
+>>>>>>> Stashed changes
       {editMode && (
-        <span className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
-          {dict.changeBanner}
-        </span>
+        <>
+          <ThemeSwitch className="absolute top-4 right-4" />
+          <div className="mb-4 flex gap-2 justify-end">
+            <button onClick={() => setLang("fr")} aria-label="Français">
+              <Image
+                src="/flags/french flag.png"
+                alt="Français"
+                width={28}
+                height={20}
+                className={`french-img ${lang === "fr" ? "ring-2 ring-indigo-600 rounded" : ""}`}
+              />
+            </button>
+            <button onClick={() => setLang("en")} aria-label="English">
+              <Image
+                src="/flags/english flag.png"
+                alt="English"
+                width={28}
+                height={20}
+                className={`english-img ${lang === "en" ? "ring-2 ring-indigo-600 rounded" : ""}`}
+              />
+            </button>
+          </div>
+        </>
       )}
 
+      {accessToken && (
+        <div className="flex text-black items-center gap-4 text-xl hover:text-indigo-600 transition ">
+          <LogoutButton />
+        </div>
+      )}
       <div
-        className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg cursor-pointer"
-
-        onClick={(e) => {
-          e.stopPropagation(); 
-          if (editMode && userId === profileId){  avatarInputRef.current?.click();
-
-          }
-        }}
-
+        className="relative h-36 bg-gray-100 cursor-pointer"
+        onClick={() => editMode && userId === profileId && bannerInputRef.current?.click()}
       >
-        {profile.profileImage ? (
+        {profile.bannerImage ? (
           <img
-            src={profile.profileImage}
-            alt="Photo profil"
-            className="w-full h-full object-cover avatar-img"
+            src={profile.bannerImage}
+            alt="Bannière"
+            className="w-full h-full object-cover banner-img"
           />
         ) : (
           <div className="flex items-center justify-center h-full text-black">
-            {dict.noImg}
+            {dict.bannerMissing}
           </div>
         )}
-      </div>
 
-  
-    </div>
+        {editMode && (
+          <span className="absolute bottom-2 right-2 text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">
+            {dict.changeBanner}
+          </span>
+        )}
+
+        <div
+          className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-white overflow-hidden bg-gray-200 shadow-lg cursor-pointer"
+
+          onClick={(e) => {
+            e.stopPropagation();
+            if (editMode && userId === profileId) {
+              avatarInputRef.current?.click();
+
+            }
+          }}
+
+        >
+          {profile.profileImage ? (
+            <img
+              src={profile.profileImage}
+              alt="Photo profil"
+              className="w-full h-full object-cover avatar-img"
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-black">
+              {dict.noImg}
+            </div>
+          )}
+        </div>
+
+
+      </div>
 
       {!editMode && userId === profileId && (
         <div className="mt-4 px-6 flex justify-end">
-        <button
-          onClick={() => setEditMode(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-        >
-          {dict.edit}
-        </button>
+          <button
+            onClick={() => setEditMode(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          >
+            {dict.edit}
+          </button>
         </div>
       )}
 
@@ -391,16 +445,16 @@ return (
               )}
               {profile.website && (
                 <a
-                  href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`}
+                  href={profile.website.startsWith("https") ? profile.website : `https://${profile.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 hover:underline"
                 >
-                  <AiOutlineLink className="w-4 h-4" /> {profile.website}
+                  <AiOutlineLink className="w-4 h-4" />
                   {profile.website.replace(/^https?:\/\//, "")}
-
                 </a>
               )}
+
             </div>
 
             <div className="flex gap-8 mt-6 text-black font-semibold text-sm border-t border-gray-200 pt-4">
@@ -571,22 +625,22 @@ return (
           );
         })}
       </div>
-       <input
-    type="file"
-    accept="image/*"
-    ref={avatarInputRef}
-    className="hidden"
-    onChange={handleAvatarChange}
-  />
-  <input
-    type="file"
-    accept="image/*"
-    ref={bannerInputRef}
-    className="hidden"
-    onChange={handleBannerChange}
-  />
+      <input
+        type="file"
+        accept="image/*"
+        ref={avatarInputRef}
+        className="hidden"
+        onChange={handleAvatarChange}
+      />
+      <input
+        type="file"
+        accept="image/*"
+        ref={bannerInputRef}
+        className="hidden"
+        onChange={handleBannerChange}
+      />
 
-</div>  
-    
+    </div>
+
   );
 }
